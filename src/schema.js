@@ -7,7 +7,7 @@ import {
     isNotDefined,
     isDefined,
 } from '@togglecorp/fujs';
-import { idCondition, arrayCondition, clearCondition } from './validation';
+import { idCondition, arrayCondition, nullCondition } from './validation';
 
 const emptyArray = [];
 
@@ -39,7 +39,7 @@ export const accumulateValues = (obj, schema, settings = {}) => {
     const isSchemaForObject = !!fields;
 
     if (isSchemaForLeaf) {
-        if (schema.includes(clearCondition)) {
+        if (schema.includes(nullCondition)) {
             if (schema.includes(arrayCondition)) {
                 return [];
             }
@@ -53,10 +53,7 @@ export const accumulateValues = (obj, schema, settings = {}) => {
             if (schema.includes(arrayCondition)) {
                 return [];
             }
-            if (nullable) {
-                return null;
-            }
-            return undefined;
+            return nullable ? null : undefined;
         }
         return obj;
     }
@@ -70,9 +67,9 @@ export const accumulateValues = (obj, schema, settings = {}) => {
             });
         }
         if (hasNoValues(values)) {
+            // return nullable ? null : emptyArray;
             // NOTE: array will always be emptyArray
             return emptyArray;
-            // return nullable ? null : emptyArray;
         }
         return values;
     }

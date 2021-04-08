@@ -31,5 +31,5 @@
         "baseUrl": ".",
         "paths": {}
     },
-    "include": ["./src/index.ts", "./src/declarations"]
+    "include": ["./src/index.ts", "./src/stories", "./src/declarations"]
 }

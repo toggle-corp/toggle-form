@@ -5,6 +5,7 @@ const postcssNormalize = require('postcss-normalize');
 
 const base = process.cwd();
 const src = path.resolve(base, 'src/');
+const nodeModulesSrc = path.resolve(base, 'node_modules/');
 
 module.exports = {
     stories: [
@@ -54,6 +55,16 @@ module.exports = {
                     },
                 ],
             });
+
+        config.module.rules
+            .push({
+                test: /\.css$/,
+                include: nodeModulesSrc,
+                use: [
+                    require.resolve('style-loader'),
+                    require.resolve('css-loader'),
+                ],
+            })
 
         return config;
     },

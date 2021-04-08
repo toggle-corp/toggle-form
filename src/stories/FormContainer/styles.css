@@ -1,0 +1,42 @@
+.row {
+    display: flex;
+    align-items: center;
+
+    >:first-child {
+        flex-grow: 1;
+    }
+
+    >:not(&:first-child) {
+        flex-shrink: 0;
+    }
+}
+
+.container {
+    display: flex;
+    padding: var(--tui-spacing-medium);
+    overflow: auto;
+
+    >* {
+        padding: 0 var(--tui-spacing-medium);
+    }
+
+    form {
+        width: 50%;
+        overflow: auto;
+
+        >p {
+            color: var(--tui-color-danger);
+        }
+
+        >* {
+            margin: var(--tui-spacing-medium) 0;
+        }
+    }
+
+    .code-block {
+        background-color: var(--tui-color-background);
+        padding: var(--tui-spacing-medium);
+        width: 50%;
+        overflow: auto;
+    }
+}
