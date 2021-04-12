@@ -4,7 +4,7 @@
         "noEmit": false,
         "emitDeclarationOnly": true,
         "declaration": true,
-        "outDir": "./build",
+        "outFile": "./build/index",
         "baseUrl": "./src"
     },
     "include": ["./src/index.ts", "./src/declarations"]

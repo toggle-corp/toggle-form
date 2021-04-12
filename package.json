@@ -98,6 +98,7 @@
         "postcss-preset-env": "^6.7.0",
         "react-is": "^16.13.1",
         "rollup": "^2.26.8",
+        "rollup-plugin-copy": "^3.4.0",
         "rollup-plugin-eslint": "^7.0.0",
         "rollup-plugin-filesize": "^9.0.2",
         "rollup-plugin-progress": "^1.1.2",

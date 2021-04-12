@@ -3,6 +3,7 @@ import resolve from '@rollup/plugin-node-resolve';
 import commonjs from '@rollup/plugin-commonjs';
 import filesize from 'rollup-plugin-filesize';
 import { eslint } from 'rollup-plugin-eslint';
+import copy from 'rollup-plugin-copy';
 
 /*
 import postcss from 'rollup-plugin-postcss';
@@ -48,6 +49,11 @@ const PLUGINS = [
     }),
     commonjs(),
     filesize(),
+    copy({
+        targets: [
+            { src: 'src/schema.d.ts', dest: 'build' },
+        ],
+    }),
 ];
 
 const OUTPUT_DATA = [
