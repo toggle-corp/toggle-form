@@ -16,11 +16,11 @@ import {
 import type { Schema, Error } from './schema';
 
 export type EntriesAsList<T> = {
-    [K in keyof T]: [T[K], K, ...unknown[]];
+    [K in keyof T]: [T[K] | ((val: T[K]) => T[K]), K, ...unknown[]];
 }[keyof T];
 
 export type EntriesAsKeyValue<T> = {
-    [K in keyof T]: {key: K, value: T[K] };
+    [K in keyof T]: {key: K, value: T[K] | ((val: T[K]) => T[K]) };
 }[keyof T];
 
 type ValidateReturn<T> = () => (
@@ -58,9 +58,11 @@ function useForm<T extends object>(
             action: ValueFieldAction | ErrorAction | ValueAction | PristineAction,
         ) => {
             if (action.type === 'SET_VALUE') {
-                const { value } = action;
+                const { value: newCallableValue } = action;
 
-                const newVal = isCallable(value) ? value(prevState.value) : value;
+                const newVal = isCallable(newCallableValue)
+                    ? newCallableValue(prevState.value)
+                    : newCallableValue;
 
                 return {
                     value: newVal,
@@ -85,10 +87,14 @@ function useForm<T extends object>(
             if (action.type === 'SET_VALUE_FIELD') {
                 const {
                     key,
-                    value: newVal,
+                    value: newCallableValue,
                 } = action;
                 const oldValue = prevState.value;
                 const oldError = prevState.error;
+
+                const newVal = isCallable(newCallableValue)
+                    ? newCallableValue(oldValue[key])
+                    : newCallableValue;
 
                 // NOTE: just don't set anything if the value is not really changed
                 if (oldValue[key] === newVal) {

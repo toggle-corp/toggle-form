@@ -182,6 +182,8 @@ export const Default = () => {
         }, [onValueSet],
     );
 
+    type Collections = typeof value.collections;
+
     const {
         onValueChange: onCollectionChange,
         onValueRemove: onCollectionRemove,
@@ -194,11 +196,13 @@ export const Default = () => {
                 uuid,
             };
             onValueChange(
-                [...(value.collections ?? []), newCollection],
+                (oldValue: Collections) => (
+                    [...(oldValue ?? []), newCollection]
+                ),
                 'collections' as const,
             );
         },
-        [onValueChange, value.collections],
+        [onValueChange],
     );
 
     return (
