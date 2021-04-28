@@ -16,6 +16,7 @@ export {
 export {
     isLocalUrl,
     isValidUrl,
+    isCallable,
 } from './utils';
 export * from './validation';
 
@@ -32,8 +33,7 @@ export type {
 export type {
     PartialForm,
     PurgeNull,
-} from './types';
-export type {
     EntriesAsList,
     EntriesAsKeyValue,
-} from './form';
+    StateArg,
+} from './types';

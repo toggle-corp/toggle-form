@@ -1,4 +1,5 @@
 import { isValidUrl as isValidRemoteUrl } from '@togglecorp/fujs';
+import { StateArg } from './types';
 
 const localhostRegex = /(?<=\/\/)localhost(?=[:/]|$)/;
 
@@ -12,4 +13,8 @@ export function isValidUrl(url: string | undefined): url is string {
     }
     const sanitizedUrl = url.replace(localhostRegex, 'localhost.com');
     return isValidRemoteUrl(sanitizedUrl);
+}
+
+export function isCallable<T>(value: StateArg<T>): value is (oldVal: T) => T {
+    return typeof value === 'function';
 }

@@ -22,3 +22,13 @@ export type PurgeNull<T> = (
                 : (T extends null ? undefined : T)
         )
 )
+
+export type StateArg<T> = T | ((value: T) => T);
+
+export type EntriesAsList<T> = {
+    [K in keyof T]-?: [StateArg<T[K]>, K, ...unknown[]];
+}[keyof T];
+
+export type EntriesAsKeyValue<T> = {
+    [K in keyof T]: {key: K, value: StateArg<T[K]> };
+}[keyof T];

@@ -8,7 +8,7 @@ import {
 import { randomString } from '@togglecorp/fujs';
 
 import useForm, { createSubmitHandler, useFormArray, useFormObject } from '../form';
-import type { PartialForm } from '../types';
+import type { PartialForm, StateArg } from '../types';
 import type { Error, ObjectSchema, ArraySchema } from '../schema';
 import FormContainer, { Row } from './FormContainer';
 import {
@@ -71,22 +71,23 @@ const schema: FormSchema = {
 
 const defaultFormValues: PartialForm<FormType> = {};
 
-interface MetaInputProps<K extends string> {
+type MetaInputValue = PartialForm<MetaType> | undefined;
+interface MetaInputProps<K extends string | number> {
    name: K,
-   value: PartialForm<MetaType> | undefined,
+   value: MetaInputValue,
    error: Error<MetaType> | undefined;
-   onChange: (value: PartialForm<MetaType>, name: K) => void;
+   onChange: (value: StateArg<MetaInputValue> | undefined, name: K) => void;
 }
-const defaultMetaValue: PartialForm<MetaType> = {};
-function MetaInput<K extends string>(props: MetaInputProps<K>) {
+const defaultMetaValue: NonNullable<MetaInputValue> = {};
+function MetaInput<K extends string | number>(props: MetaInputProps<K>) {
     const {
         name,
-        value = defaultMetaValue,
+        value,
         error,
         onChange,
     } = props;
 
-    const onFieldChange = useFormObject(name, value, onChange);
+    const onFieldChange = useFormObject(name, onChange, defaultMetaValue);
 
     return (
         <>
@@ -96,14 +97,14 @@ function MetaInput<K extends string>(props: MetaInputProps<K>) {
             <NumberInput
                 label="Age *"
                 name="age"
-                value={value.age}
+                value={value?.age}
                 onChange={onFieldChange}
                 error={error?.fields?.age}
             />
             <TextInput
                 label="Job"
                 name="job"
-                value={value.job}
+                value={value?.job}
                 onChange={onFieldChange}
                 error={error?.fields?.job}
             />
@@ -111,10 +112,13 @@ function MetaInput<K extends string>(props: MetaInputProps<K>) {
     );
 }
 
+const defaultCollectionValue: PartialForm<CollectionType> = {
+    uuid: 'test',
+};
 interface CollectionInputProps {
    value: PartialForm<CollectionType>,
    error: Error<CollectionType> | undefined;
-   onChange: (value: PartialForm<CollectionType>, index: number) => void;
+   onChange: (value: StateArg<PartialForm<CollectionType>>, index: number) => void;
    onRemove: (index: number) => void;
    index: number,
 }
@@ -127,7 +131,7 @@ function CollectionInput(props: CollectionInputProps) {
         index,
     } = props;
 
-    const onFieldChange = useFormObject(index, value, onChange);
+    const onFieldChange = useFormObject(index, onChange, defaultCollectionValue);
 
     return (
         <>
@@ -187,7 +191,7 @@ export const Default = () => {
     const {
         onValueChange: onCollectionChange,
         onValueRemove: onCollectionRemove,
-    } = useFormArray('collections', value.collections ?? [], onValueChange);
+    } = useFormArray('collections', onValueChange);
 
     const handleCollectionAdd = useCallback(
         () => {
@@ -196,7 +200,7 @@ export const Default = () => {
                 uuid,
             };
             onValueChange(
-                (oldValue: Collections) => (
+                (oldValue: PartialForm<Collections>) => (
                     [...(oldValue ?? []), newCollection]
                 ),
                 'collections' as const,
