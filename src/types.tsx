@@ -1,13 +1,13 @@
 // eslint-disable-next-line @typescript-eslint/ban-types
-export type PartialForm<T> = T extends object ? (
+export type PartialForm<T, J extends object = { uuid: string }> = T extends object ? (
     T extends (infer K)[] ? (
-        PartialForm<K>[]
+        PartialForm<K, J>[]
     ) : (
-        T extends { uuid: string } ? (
-            { [P in Exclude<keyof T, 'uuid'>]?: PartialForm<T[P]> }
-            & Pick<T, 'uuid'>
+        T extends J ? (
+            { [P in Exclude<keyof T, keyof J>]?: PartialForm<T[P], J> }
+            & Pick<T, keyof J>
         ) : (
-            { [P in keyof T]?: PartialForm<T[P]> }
+            { [P in keyof T]?: PartialForm<T[P], J> }
         )
     )
 ) : T;
