@@ -1,8 +1,6 @@
 import {
     useReducer,
     useCallback,
-    useRef,
-    useLayoutEffect,
 } from 'react';
 import { isDefined } from '@togglecorp/fujs';
 
@@ -14,24 +12,17 @@ import {
 } from './schema';
 
 import type { Schema, Error } from './schema';
-
-export type EntriesAsList<T> = {
-    [K in keyof T]: [T[K], K, ...unknown[]];
-}[keyof T];
-
-export type EntriesAsKeyValue<T> = {
-    [K in keyof T]: {key: K, value: T[K] };
-}[keyof T];
+import type {
+    StateArg,
+    EntriesAsKeyValue,
+    EntriesAsList,
+} from './types';
+import { isCallable } from './utils';
 
 type ValidateReturn<T> = () => (
     { errored: true, error: Error<T>, value: undefined }
     | { errored: false, value: T, error: undefined }
 )
-
-// FIXME: move to utils
-function isCallable<T>(value: T | ((oldVal: T) => T)): value is (oldVal: T) => T {
-    return typeof value === 'function';
-}
 
 // eslint-disable-next-line @typescript-eslint/ban-types
 function useForm<T extends object>(
@@ -44,7 +35,7 @@ function useForm<T extends object>(
     validate: ValidateReturn<T>,
     onPristineSet: (pristine: boolean) => void,
     onErrorSet: (errors: Error<T> | undefined) => void,
-    onValueSet: (value: T | ((oldValue: T) => T)) => void,
+    onValueSet: (value: StateArg<T>) => void,
     onValueChange: (...entries: EntriesAsList<T>) => void,
 } {
     type ErrorAction = { type: 'SET_ERROR', error: Error<T> | undefined };
@@ -58,9 +49,11 @@ function useForm<T extends object>(
             action: ValueFieldAction | ErrorAction | ValueAction | PristineAction,
         ) => {
             if (action.type === 'SET_VALUE') {
-                const { value } = action;
+                const { value: newCallableValue } = action;
 
-                const newVal = isCallable(value) ? value(prevState.value) : value;
+                const newVal = isCallable(newCallableValue)
+                    ? newCallableValue(prevState.value)
+                    : newCallableValue;
 
                 return {
                     value: newVal,
@@ -85,10 +78,14 @@ function useForm<T extends object>(
             if (action.type === 'SET_VALUE_FIELD') {
                 const {
                     key,
-                    value: newVal,
+                    value: newCallableValue,
                 } = action;
                 const oldValue = prevState.value;
                 const oldError = prevState.error;
+
+                const newVal = isCallable(newCallableValue)
+                    ? newCallableValue(oldValue[key])
+                    : newCallableValue;
 
                 // NOTE: just don't set anything if the value is not really changed
                 if (oldValue[key] === newVal) {
@@ -146,7 +143,7 @@ function useForm<T extends object>(
     );
 
     const setValue = useCallback(
-        (value: T | ((oldValue: T) => T)) => {
+        (value: StateArg<T>) => {
             const action: ValueAction = {
                 type: 'SET_VALUE',
                 value,
@@ -199,67 +196,79 @@ function useForm<T extends object>(
 }
 
 // eslint-disable-next-line @typescript-eslint/ban-types
-export function useFormObject<K extends string | number, T extends object>(
+export function useFormObject<K extends string | number, T extends object | undefined>(
     name: K,
-    value: T,
-    onChange: (newValue: T, inputName: K) => void,
+    onChange: (value: StateArg<T>, name: K) => void,
+    defaultValue: NonNullable<T>,
 ) {
-    const ref = useRef<T>(value);
     const onValueChange = useCallback(
-        (...entries: EntriesAsList<T>) => {
-            const newValue = {
-                ...ref.current,
-                [entries[1]]: entries[0],
-            };
-            onChange(newValue, name);
+        (...entries: EntriesAsList<NonNullable<T>>) => {
+            // NOTE: may need to cast callableValue here
+            const callableValue = entries[0];
+            const key = entries[1];
+            onChange(
+                (oldValue: T): T => {
+                    const baseValue = oldValue ?? defaultValue;
+                    return {
+                        ...baseValue,
+                        [key]: isCallable(callableValue)
+                            ? callableValue(baseValue[key])
+                            : callableValue,
+                    };
+                },
+                name,
+            );
         },
-        [name, onChange],
+        [name, defaultValue, onChange],
     );
 
-    useLayoutEffect(
-        () => {
-            ref.current = value;
-        },
-        [value],
-    );
     return onValueChange;
 }
 
 // eslint-disable-next-line @typescript-eslint/ban-types
 export function useFormArray<K extends string, T extends object>(
     name: K,
-    value: T[],
-    onChange: (newValue: T[], inputName: K) => void,
+    onChange: (
+        newValue: StateArg<T[] | undefined>,
+        inputName: K,
+    ) => void,
 ) {
-    const ref = useRef<T[]>(value);
     const onValueChange = useCallback(
-        (val: T, index: number) => {
-            const newValue = [
-                ...ref.current,
-            ];
-            newValue[index] = val;
-            onChange(newValue, name);
+        (val: StateArg<T>, index: number) => {
+            onChange(
+                (oldValue: T[] | undefined): T[] | undefined => {
+                    if (!oldValue) {
+                        return undefined;
+                    }
+                    const newVal = [...oldValue];
+                    newVal[index] = isCallable(val)
+                        ? val(oldValue[index])
+                        : val;
+                    return newVal;
+                },
+                name,
+            );
         },
         [name, onChange],
     );
 
     const onValueRemove = useCallback(
         (index: number) => {
-            const newValue = [
-                ...ref.current,
-            ];
-            newValue.splice(index, 1);
-            onChange(newValue, name);
+            onChange(
+                (oldValue: T[] | undefined): T[] | undefined => {
+                    if (!oldValue) {
+                        return undefined;
+                    }
+                    const newVal = [...oldValue];
+                    newVal.splice(index, 1);
+                    return newVal;
+                },
+                name,
+            );
         },
         [name, onChange],
     );
 
-    useLayoutEffect(
-        () => {
-            ref.current = value;
-        },
-        [value],
-    );
     return { onValueChange, onValueRemove };
 }
 
