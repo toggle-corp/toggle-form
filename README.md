@@ -22,12 +22,23 @@ yarn lint
 yarn typecheck
 ```
 
-## Todo
+## Special Cases
 
-- [ ] Document special case for uuid
-    - If items do have a uuid field, it should be a required string.
-- [ ] Document special case for id
-    - For all other fields except id, the form sets null to indicate no information.
-    - For id, the form sets undefined to indicate no information.
-- [ ] Document special case for array
-    - For all arrays, the form sets [] to indicate no information.
+### idCondition
+
+For all fields, the form sets `null` to indicate there is no information.
+On special cases, we would want to set `undefined` to indicate there is no information.
+We can use `idCondition` to alter that behavior.
+
+### arrayCondition
+
+For all fields, the form sets `null` to indicate there is no information.
+For array type, we would want to set `[]` to indicate there is no information.
+We can use `arrayCondition` to alter that behavior.
+
+> `arrayCondition` also alters type of error generated
+
+### nullCondition
+
+Sometimes we would want to clear value for certain fields.
+We can use `nullCondition` to conditionally clear values.

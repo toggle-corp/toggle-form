@@ -8,7 +8,7 @@ import {
 import { randomString } from '@togglecorp/fujs';
 
 import useForm, { createSubmitHandler, useFormArray, useFormObject } from '../form';
-import type { PartialForm, StateArg } from '../types';
+import type { PartialForm as RawPartialForm, StateArg } from '../types';
 import type { Error, ObjectSchema, ArraySchema } from '../schema';
 import FormContainer, { Row } from './FormContainer';
 import {
@@ -17,6 +17,8 @@ import {
     greaterThanCondition,
 } from '../validation';
 
+type PartialForm<T> = RawPartialForm<T, { clientId: string }>;
+
 type FormType = {
     name?: string;
     meta?: {
@@ -24,7 +26,7 @@ type FormType = {
         job?: string;
     };
     collections?: {
-        uuid: string;
+        clientId: string;
         date?: string;
         title?: string;
     }[];
@@ -48,7 +50,7 @@ type CollectionSchema = ObjectSchema<PartialForm<CollectionType>>;
 type CollectionSchemaFields = ReturnType<CollectionSchema['fields']>;
 const collectionSchema: CollectionSchema = {
     fields: (): CollectionSchemaFields => ({
-        uuid: [],
+        clientId: [],
         date: [],
         title: [requiredStringCondition],
     }),
@@ -57,7 +59,7 @@ const collectionSchema: CollectionSchema = {
 type CollectionsSchema = ArraySchema<PartialForm<CollectionType>>;
 type CollectionsSchemaMember = ReturnType<CollectionsSchema['member']>;
 const collectionsSchema: CollectionsSchema = {
-    keySelector: (col) => col.uuid,
+    keySelector: (col) => col.clientId,
     member: (): CollectionsSchemaMember => collectionSchema,
 };
 
@@ -113,7 +115,7 @@ function MetaInput<K extends string | number>(props: MetaInputProps<K>) {
 }
 
 const defaultCollectionValue: PartialForm<CollectionType> = {
-    uuid: 'test',
+    clientId: 'test',
 };
 interface CollectionInputProps {
    value: PartialForm<CollectionType>,
@@ -195,9 +197,9 @@ export const Default = () => {
 
     const handleCollectionAdd = useCallback(
         () => {
-            const uuid = randomString();
+            const clientId = randomString();
             const newCollection: PartialForm<CollectionType> = {
-                uuid,
+                clientId,
             };
             onValueChange(
                 (oldValue: PartialForm<Collections>) => (
@@ -248,12 +250,12 @@ export const Default = () => {
                 {value.collections?.length ? (
                     value.collections.map((collection, index) => (
                         <CollectionInput
-                            key={collection.uuid}
+                            key={collection.clientId}
                             index={index}
                             value={collection}
                             onChange={onCollectionChange}
                             onRemove={onCollectionRemove}
-                            error={error?.fields?.collections?.members?.[collection.uuid]}
+                            error={error?.fields?.collections?.members?.[collection.clientId]}
                         />
                     ))
                 ) : (
