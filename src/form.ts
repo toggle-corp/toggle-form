@@ -1,6 +1,8 @@
 import {
     useReducer,
     useCallback,
+    useEffect,
+    useRef,
 } from 'react';
 import { isDefined } from '@togglecorp/fujs';
 
@@ -43,82 +45,86 @@ function useForm<T extends object>(
     type PristineAction = { type: 'SET_PRISTINE', value: boolean };
     type ValueFieldAction = EntriesAsKeyValue<T> & { type: 'SET_VALUE_FIELD' };
 
-    const formReducer = useCallback(
-        (
-            prevState: { value: T, error: Error<T> | undefined, pristine: boolean },
-            action: ValueFieldAction | ErrorAction | ValueAction | PristineAction,
-        ) => {
-            if (action.type === 'SET_VALUE') {
-                const { value: newCallableValue } = action;
+    const valueRef = useRef({});
 
-                const newVal = isCallable(newCallableValue)
-                    ? newCallableValue(prevState.value)
-                    : newCallableValue;
+    const formReducer = useCallback((
+        prevState: { value: T, error: Error<T> | undefined, pristine: boolean },
+        action: ValueFieldAction | ErrorAction | ValueAction | PristineAction,
+    ) => {
+        if (action.type === 'SET_VALUE') {
+            const { value: valueFromAction } = action;
 
-                return {
-                    value: newVal,
-                    error: undefined,
-                    pristine: true,
-                };
+            const newVal = isCallable(valueFromAction)
+                ? valueFromAction(prevState.value)
+                : valueFromAction;
+
+            return {
+                value: newVal,
+                error: undefined,
+                pristine: true,
+            };
+        }
+        if (action.type === 'SET_PRISTINE') {
+            const { value } = action;
+            return {
+                ...prevState,
+                pristine: value,
+            };
+        }
+        if (action.type === 'SET_ERROR') {
+            const { error } = action;
+            return {
+                ...prevState,
+                error,
+            };
+        }
+        if (action.type === 'SET_VALUE_FIELD') {
+            const {
+                key,
+                value: valueFromAction,
+            } = action;
+            const oldValue = prevState.value;
+            const oldError = prevState.error;
+
+            const newVal = isCallable(valueFromAction)
+                ? valueFromAction(oldValue[key])
+                : valueFromAction;
+
+            // NOTE: just don't set anything if the value is not really changed
+            if (oldValue[key] === newVal) {
+                return prevState;
             }
-            if (action.type === 'SET_PRISTINE') {
-                const { value } = action;
-                return {
-                    ...prevState,
-                    pristine: value,
-                };
-            }
-            if (action.type === 'SET_ERROR') {
-                const { error } = action;
-                return {
-                    ...prevState,
-                    error,
-                };
-            }
-            if (action.type === 'SET_VALUE_FIELD') {
-                const {
-                    key,
-                    value: newCallableValue,
-                } = action;
-                const oldValue = prevState.value;
-                const oldError = prevState.error;
 
-                const newVal = isCallable(newCallableValue)
-                    ? newCallableValue(oldValue[key])
-                    : newCallableValue;
+            const newValue = {
+                ...oldValue,
+                [key]: newVal,
+            };
 
-                // NOTE: just don't set anything if the value is not really changed
-                if (oldValue[key] === newVal) {
-                    return prevState;
-                }
+            const newError = accumulateDifferentialErrors(
+                oldValue,
+                newValue,
+                oldError,
+                schema,
+            );
 
-                const newValue = {
-                    ...oldValue,
-                    [key]: newVal,
-                };
-                const newError = accumulateDifferentialErrors(
-                    oldValue,
-                    newValue,
-                    oldError,
-                    schema,
-                );
-
-                return {
-                    value: newValue,
-                    error: newError,
-                    pristine: false,
-                };
-            }
-            console.error('Action is not supported');
-            return prevState;
-        },
-        [schema],
-    );
+            return {
+                value: newValue,
+                error: newError,
+                pristine: false,
+            };
+        }
+        console.error('Action is not supported');
+        return prevState;
+    }, [schema]);
 
     const [state, dispatch] = useReducer(
         formReducer,
         { value: initialFormValue, error: undefined, pristine: true },
     );
+
+    useEffect(() => {
+        valueRef.current = state.value;
+    }, [state.value]);
 
     const setPristine = useCallback(
         (pristineValue: boolean) => {

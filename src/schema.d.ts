@@ -22,6 +22,7 @@ export type ArraySchema<T> = {
 export type ObjectSchema<T> = {
     validation?: (value: T | undefined) => string | undefined;
     fields: (value: T | undefined) => ({ [K in keyof T]: Schema<T[K]> });
+    fieldDependencies?: (value: T) => ({ [K in keyof T]: (keyof T)[]});
 }
 
 export type Error<T> = (
@@ -32,7 +33,7 @@ export type Error<T> = (
             Exclude<T, undefined> extends object
                 ? ObjectError<Exclude<T, undefined>>
                 : LeafError
-          )
+        )
 );
 
 export type LeafError = string | undefined;
@@ -62,7 +63,7 @@ export function accumulateErrors<T>(
     schema: Schema<T>,
 ): Error<T> | undefined;
 
-export function accumulateDifferentialErrors<T>(
+export function accumulateDifferentialErrors<T, V>(
     oldObj: T,
     newObj: T,
     oldError: Error<T> | undefined,
