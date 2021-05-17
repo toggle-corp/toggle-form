@@ -63,7 +63,7 @@ export function accumulateErrors<T>(
     schema: Schema<T>,
 ): Error<T> | undefined;
 
-export function accumulateDifferentialErrors<T, V>(
+export function accumulateDifferentialErrors<T>(
     oldObj: T,
     newObj: T,
     oldError: Error<T> | undefined,

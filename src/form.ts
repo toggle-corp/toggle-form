@@ -45,8 +45,6 @@ function useForm<T extends object>(
     type PristineAction = { type: 'SET_PRISTINE', value: boolean };
     type ValueFieldAction = EntriesAsKeyValue<T> & { type: 'SET_VALUE_FIELD' };
 
-    const valueRef = useRef({});
-
     const formReducer = useCallback((
         prevState: { value: T, error: Error<T> | undefined, pristine: boolean },
         action: ValueFieldAction | ErrorAction | ValueAction | PristineAction,
@@ -121,10 +119,6 @@ function useForm<T extends object>(
         formReducer,
         { value: initialFormValue, error: undefined, pristine: true },
     );
-
-    useEffect(() => {
-        valueRef.current = state.value;
-    }, [state.value]);
 
     const setPristine = useCallback(
         (pristineValue: boolean) => {
