@@ -1,8 +1,6 @@
 import {
     useReducer,
     useCallback,
-    useEffect,
-    useRef,
 } from 'react';
 import { isDefined } from '@togglecorp/fujs';
 

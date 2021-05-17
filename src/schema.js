@@ -93,7 +93,7 @@ export const accumulateValues = (obj, schema, settings = {}) => {
     return undefined;
 };
 
-export const accumulateErrors = (obj, schema) => {
+export const accumulateErrors = (obj, schema, value = obj) => {
     const {
         member,
         fields,
@@ -107,7 +107,7 @@ export const accumulateErrors = (obj, schema) => {
     if (isSchemaForLeaf) {
         let error;
         schema.every((rule) => {
-            const message = rule(obj);
+            const message = rule(obj, value);
             if (message) {
                 if (schema.includes(arrayCondition)) {
                     error = { $internal: message };
@@ -127,6 +127,7 @@ export const accumulateErrors = (obj, schema) => {
             errors.$internal = validationErrors;
         }
     }
+
     if (isSchemaForArray) {
         if (obj) {
             obj.forEach((element) => {
@@ -143,10 +144,11 @@ export const accumulateErrors = (obj, schema) => {
         }
         return hasNoKeys(errors.members) && !errors.$internal ? undefined : errors;
     }
+
     if (isSchemaForObject) {
         const localFields = fields(obj);
         Object.keys(localFields).forEach((fieldName) => {
-            const fieldError = accumulateErrors(obj?.[fieldName], localFields[fieldName]);
+            const fieldError = accumulateErrors(obj?.[fieldName], localFields[fieldName], obj);
             if (fieldError) {
                 if (!errors.fields) {
                     errors.fields = {};
@@ -247,23 +249,16 @@ export const accumulateDifferentialErrors = (
     }
 
     if (isSchemaForObject) {
-        let dependents;
-        if (fieldDependencies) {
-            dependents = {};
-            const dependencies = fieldDependencies();
-            Object.keys(dependencies).forEach((dependant) => {
-                dependencies[dependant].forEach((depender) => {
-                    if (!dependents[depender]) {
-                        dependents[depender] = [];
-                    }
+        const dependencies = fieldDependencies ? fieldDependencies() : undefined;
+        const hasDepsChanged = (deps) => deps?.some(
+            (key) => oldObj?.[key] !== newObj?.[key],
+        ) ?? false;
 
-                    dependents[depender].push(dependant);
-                });
-            });
-        }
         const localFields = fields(newObj);
         Object.keys(localFields).forEach((fieldName) => {
-            if (oldObj?.[fieldName] === newObj?.[fieldName]) {
+            const depsChanged = hasDepsChanged(dependencies?.[fieldName]);
+
+            if (oldObj?.[fieldName] === newObj?.[fieldName] && !depsChanged) {
                 if (oldError?.fields?.[fieldName]) {
                     if (!errors.fields) {
                         errors.fields = {};
@@ -279,6 +274,7 @@ export const accumulateDifferentialErrors = (
                 oldError?.fields?.[fieldName],
                 localFields[fieldName],
                 newObj,
+                true,
             );
 
             if (fieldError) {
@@ -286,29 +282,6 @@ export const accumulateDifferentialErrors = (
                     errors.fields = {};
                 }
                 errors.fields[fieldName] = fieldError;
-            }
-
-            if (dependents[fieldName]) {
-                dependents[fieldName].forEach((field) => {
-                    const dependentFieldError = accumulateDifferentialErrors(
-                        newObj?.[field],
-                        newObj?.[field],
-                        undefined,
-                        localFields[field],
-                        newObj,
-                        true,
-                    );
-
-                    if (dependentFieldError) {
-                        if (!errors.fields) {
-                            errors.fields = {};
-                        }
-
-                        errors.fields[field] = dependentFieldError;
-                    } else if (errors.fields && errors.fields[field]) {
-                        errors.fields[field] = undefined;
-                    }
-                });
             }
         });
 

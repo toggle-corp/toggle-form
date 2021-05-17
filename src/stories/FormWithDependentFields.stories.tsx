@@ -3,6 +3,7 @@ import { isDefined } from '@togglecorp/fujs';
 import {
     Button,
     TextInput,
+    DateInput,
 } from '@togglecorp/toggle-ui';
 
 import useForm, { createSubmitHandler } from '../form';
@@ -20,7 +21,14 @@ type FormType = {
 type FormSchema = ObjectSchema<PartialForm<FormType>>
 type FormSchemaFields = ReturnType<FormSchema['fields']>;
 
-function requiredWithBirthDateCondition(birthPlace: string | undefined, value: any) {
+function testCondition(value: string | undefined) {
+    return value;
+}
+
+function requiredWithBirthDateCondition(
+    birthPlace: string | undefined,
+    value: PartialForm<FormType>,
+) {
     if (isDefined(value.birthDate) && !isDefined(birthPlace)) {
         return 'Birth place is required when birth date is entered';
     }
@@ -30,7 +38,7 @@ function requiredWithBirthDateCondition(birthPlace: string | undefined, value: a
 
 const schema: FormSchema = {
     fields: (): FormSchemaFields => ({
-        firstName: [],
+        firstName: [testCondition],
         lastName: [],
         birthDate: [],
         birthPlace: [requiredWithBirthDateCondition],
@@ -40,7 +48,9 @@ const schema: FormSchema = {
     }),
 };
 
-const defaultFormValues: PartialForm<FormType> = {};
+const defaultFormValues: PartialForm<FormType> = {
+    birthDate: 'Hello world',
+};
 
 export const Default = () => {
     const {
@@ -81,7 +91,7 @@ export const Default = () => {
                     onChange={onValueChange}
                     error={error?.fields?.lastName}
                 />
-                <TextInput
+                <DateInput
                     label="Birth date"
                     name="birthDate"
                     value={value.birthDate}

@@ -1,27 +1,27 @@
 import { PurgeNull } from './types';
 
-export type Schema<T> = (
+export type Schema<T, V=T> = (
     Exclude<T, undefined> extends unknown[]
-        ? ArraySchema<Exclude<T, undefined>[number]> | LiteralSchema<T>
+        ? ArraySchema<Exclude<T, undefined>[number]> | LiteralSchema<T, V>
         : (
             // eslint-disable-next-line @typescript-eslint/ban-types
             Exclude<T, undefined> extends object
-                ? ObjectSchema<Exclude<T, undefined>> | LiteralSchema<T>
-                : LiteralSchema<T>
+                ? ObjectSchema<Exclude<T, undefined>> | LiteralSchema<T, V>
+                : LiteralSchema<T, V>
           )
 );
 
-export type LiteralSchema<T> = ((value: T) => string | undefined)[];
+export type LiteralSchema<T, V> = ((value: T, allvalue: V) => string | undefined)[];
 
-export type ArraySchema<T> = {
+export type ArraySchema<T, V=T> = {
     validation?: (value: T[] | undefined) => string | undefined;
-    member: (value: T) => Schema<T>;
+    member: (value: T) => Schema<T, V>;
     keySelector: (value: T) => string | number;
 }
 
-export type ObjectSchema<T> = {
+export type ObjectSchema<T, V=T> = {
     validation?: (value: T | undefined) => string | undefined;
-    fields: (value: T | undefined) => ({ [K in keyof T]: Schema<T[K]> });
+    fields: (value: T | undefined) => ({ [K in keyof T]: Schema<T[K], V> });
     fieldDependencies?: (value: T) => ({ [K in keyof T]: (keyof T)[]});
 }
 

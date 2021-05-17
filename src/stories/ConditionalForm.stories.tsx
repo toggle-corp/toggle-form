@@ -24,30 +24,11 @@ type FormType = {
 type FormSchema = ObjectSchema<PartialForm<FormType>>
 type FormSchemaFields = ReturnType<FormSchema['fields']>;
 
-function firstNameCondition(value: string | undefined, allValue) {
-    if (value === 'Ankit' && allValue.lastName === 'Mehta') {
-        return 'You cannot have Ankit as first name when Mehta is last name';
-    }
-
-    if (value === 'Ankit' && allValue.address !== 'Imadol') {
-        return 'Ankit lives in the Imadol';
-    }
-
-    return undefined;
-}
-
-function lastNameCondition(value: string | undefined, allValue) {
-    if (allValue.firstName && !value) {
-        return 'Last name is required if you enter first name';
-    }
-    return undefined;
-}
-
 const schema: FormSchema = {
     fields: (value): FormSchemaFields => {
         let baseSchema: FormSchemaFields = {
-            firstName: [requiredStringCondition, firstNameCondition],
-            lastName: [lastNameCondition],
+            firstName: [requiredStringCondition],
+            lastName: [],
             detailed: [],
             job: [nullCondition],
             age: [nullCondition],
