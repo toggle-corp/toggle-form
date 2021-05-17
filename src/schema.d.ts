@@ -22,7 +22,7 @@ export type ArraySchema<T, V=T> = {
 export type ObjectSchema<T, V=T> = {
     validation?: (value: T | undefined) => string | undefined;
     fields: (value: T | undefined) => ({ [K in keyof T]: Schema<T[K], V> });
-    fieldDependencies?: (value: T) => ({ [K in keyof T]: (keyof T)[]});
+    fieldDependencies?: (value: T | undefined) => ({ [K in keyof T]: (keyof T)[]});
 }
 
 export type Error<T> = (
