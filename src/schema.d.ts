@@ -14,14 +14,14 @@ export type Schema<T> = (
 export type LiteralSchema<T> = ((value: T) => string | undefined)[];
 
 export type ArraySchema<T> = {
-    validation?: (value: T) => string | undefined;
+    validation?: (value: T[] | undefined) => string | undefined;
     member: (value: T) => Schema<T>;
     keySelector: (value: T) => string | number;
 }
 
 export type ObjectSchema<T> = {
-    validation?: (value: T) => string | undefined;
-    fields: (value: T) => ({ [K in keyof T]: Schema<T[K]> });
+    validation?: (value: T | undefined) => string | undefined;
+    fields: (value: T | undefined) => ({ [K in keyof T]: Schema<T[K]> });
 }
 
 export type Error<T> = (

@@ -3,7 +3,6 @@ import {
     Button,
     TextInput,
     NumberInput,
-    Checkbox,
 } from '@togglecorp/toggle-ui';
 
 import useForm, { createSubmitHandler } from '../form';
@@ -13,9 +12,11 @@ import FormContainer from './FormContainer';
 import { requiredStringCondition, requiredCondition, nullCondition } from '../validation';
 
 type FormType = {
+    step: number;
+
     firstName: string;
     lastName: string;
-    detailed?: boolean;
+
     age?: number;
     job?: string;
     address?: string;
@@ -27,26 +28,35 @@ type FormSchemaFields = ReturnType<FormSchema['fields']>;
 const schema: FormSchema = {
     fields: (value): FormSchemaFields => {
         let baseSchema: FormSchemaFields = {
-            firstName: [requiredStringCondition],
-            lastName: [],
-            detailed: [],
+            step: [],
+            firstName: [nullCondition],
+            lastName: [nullCondition],
             job: [nullCondition],
             age: [nullCondition],
             address: [nullCondition],
         };
-        if (value?.detailed) {
+        if (value?.step === 1) {
             baseSchema = {
                 ...baseSchema,
-                job: [],
+                firstName: [requiredStringCondition],
+                lastName: [],
+            };
+        }
+        if (value?.step === 2) {
+            baseSchema = {
+                ...baseSchema,
+                job: [requiredStringCondition],
                 age: [requiredCondition],
-                address: [requiredStringCondition],
+                address: [],
             };
         }
         return baseSchema;
     },
 };
 
-const defaultFormValues: PartialForm<FormType> = {};
+const defaultFormValues: PartialForm<FormType> = {
+    step: 1,
+};
 
 export const Default = () => {
     const {
@@ -61,7 +71,11 @@ export const Default = () => {
 
     const handleSubmit = useCallback(
         (finalValues: PartialForm<FormType>) => {
-            onValueSet(finalValues);
+            if (finalValues.step === 1) {
+                onValueSet((val) => ({ ...val, step: 2 }));
+            } else {
+                onValueSet(finalValues);
+            }
         }, [onValueSet],
     );
 
@@ -73,28 +87,25 @@ export const Default = () => {
                 <p>
                     {error?.$internal}
                 </p>
-                <TextInput
-                    label="First Name *"
-                    name="firstName"
-                    value={value.firstName}
-                    onChange={onValueChange}
-                    error={error?.fields?.firstName}
-                />
-                <TextInput
-                    label="Last Name"
-                    name="lastName"
-                    value={value.lastName}
-                    onChange={onValueChange}
-                    error={error?.fields?.lastName}
-                />
-                <Checkbox
-                    label="I can add more details"
-                    name="detailed"
-                    value={value.detailed}
-                    onChange={onValueChange}
-                    // error={error?.fields?.detailed}
-                />
-                {value.detailed && (
+                {value.step === 1 && (
+                    <>
+                        <TextInput
+                            label="First Name *"
+                            name="firstName"
+                            value={value.firstName}
+                            onChange={onValueChange}
+                            error={error?.fields?.firstName}
+                        />
+                        <TextInput
+                            label="Last Name"
+                            name="lastName"
+                            value={value.lastName}
+                            onChange={onValueChange}
+                            error={error?.fields?.lastName}
+                        />
+                    </>
+                )}
+                {value.step === 2 && (
                     <>
                         <TextInput
                             label="Address *"
@@ -133,5 +144,5 @@ export const Default = () => {
 };
 
 export default {
-    title: 'Form/Conditional Form',
+    title: 'Form/Stepwise Form',
 };

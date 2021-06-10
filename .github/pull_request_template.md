@@ -1,5 +1,5 @@
-- Addresses xxxxxx (eg: #1)
-- Depends on xxxxxx (eg: #1)
+- Addresses xxxxxx
+- Depends on xxxxxx
 
 ## Changes
 
