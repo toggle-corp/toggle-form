@@ -49,11 +49,11 @@ function useForm<T extends object>(
             action: ValueFieldAction | ErrorAction | ValueAction | PristineAction,
         ) => {
             if (action.type === 'SET_VALUE') {
-                const { value: newCallableValue } = action;
+                const { value: valueFromAction } = action;
 
-                const newVal = isCallable(newCallableValue)
-                    ? newCallableValue(prevState.value)
-                    : newCallableValue;
+                const newVal = isCallable(valueFromAction)
+                    ? valueFromAction(prevState.value)
+                    : valueFromAction;
 
                 return {
                     value: newVal,
@@ -78,14 +78,14 @@ function useForm<T extends object>(
             if (action.type === 'SET_VALUE_FIELD') {
                 const {
                     key,
-                    value: newCallableValue,
+                    value: valueFromAction,
                 } = action;
                 const oldValue = prevState.value;
                 const oldError = prevState.error;
 
-                const newVal = isCallable(newCallableValue)
-                    ? newCallableValue(oldValue[key])
-                    : newCallableValue;
+                const newVal = isCallable(valueFromAction)
+                    ? valueFromAction(oldValue[key])
+                    : valueFromAction;
 
                 // NOTE: just don't set anything if the value is not really changed
                 if (oldValue[key] === newVal) {
@@ -96,6 +96,7 @@ function useForm<T extends object>(
                     ...oldValue,
                     [key]: newVal,
                 };
+
                 const newError = accumulateDifferentialErrors(
                     oldValue,
                     newValue,
