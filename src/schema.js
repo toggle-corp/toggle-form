@@ -93,7 +93,7 @@ export const accumulateValues = (obj, schema, settings = {}) => {
     return undefined;
 };
 
-export const accumulateErrors = (obj, schema, value = obj) => {
+export const accumulateErrors = (obj, schema, baseValue = obj) => {
     const {
         member,
         fields,
@@ -107,7 +107,7 @@ export const accumulateErrors = (obj, schema, value = obj) => {
     if (isSchemaForLeaf) {
         let error;
         schema.every((rule) => {
-            const message = rule(obj, value);
+            const message = rule(obj, baseValue);
             if (message) {
                 if (schema.includes(arrayCondition)) {
                     error = { $internal: message };
@@ -132,7 +132,7 @@ export const accumulateErrors = (obj, schema, value = obj) => {
         if (obj) {
             obj.forEach((element) => {
                 const localMember = member(element);
-                const fieldError = accumulateErrors(element, localMember);
+                const fieldError = accumulateErrors(element, localMember, baseValue);
                 if (fieldError) {
                     const index = keySelector(element);
                     if (!errors.members) {
@@ -148,7 +148,11 @@ export const accumulateErrors = (obj, schema, value = obj) => {
     if (isSchemaForObject) {
         const localFields = fields(obj);
         Object.keys(localFields).forEach((fieldName) => {
-            const fieldError = accumulateErrors(obj?.[fieldName], localFields[fieldName], obj);
+            const fieldError = accumulateErrors(
+                obj?.[fieldName],
+                localFields[fieldName],
+                baseValue,
+            );
             if (fieldError) {
                 if (!errors.fields) {
                     errors.fields = {};
@@ -168,7 +172,11 @@ export const accumulateDifferentialErrors = (
     newObj,
     oldError,
     schema,
-    value = newObj,
+    baseValue = newObj,
+    // NOTE:
+    // the function checks if oldObj and newObj are different
+    // so, forced is used when the dependencies have changed
+    // and the new error is calculated
     forced = false,
 ) => {
     if (!forced && oldObj === newObj) {
@@ -189,7 +197,7 @@ export const accumulateDifferentialErrors = (
     if (isSchemaForLeaf) {
         let error;
         schema.every((rule) => {
-            const message = rule(newObj, value);
+            const message = rule(newObj, baseValue);
             if (message) {
                 if (schema.includes(arrayCondition)) {
                     error = { $internal: message };
@@ -234,7 +242,7 @@ export const accumulateDifferentialErrors = (
                 e.new,
                 oldError?.members?.[index],
                 localMember,
-                value,
+                baseValue,
             );
 
             if (fieldError) {
@@ -273,7 +281,7 @@ export const accumulateDifferentialErrors = (
                 newObj?.[fieldName],
                 oldError?.fields?.[fieldName],
                 localFields[fieldName],
-                newObj,
+                baseValue,
                 true,
             );
 

@@ -21,10 +21,6 @@ type FormType = {
 type FormSchema = ObjectSchema<PartialForm<FormType>>
 type FormSchemaFields = ReturnType<FormSchema['fields']>;
 
-function testCondition(value: string | undefined) {
-    return value;
-}
-
 function requiredWithBirthDateCondition(
     birthPlace: string | undefined,
     value: PartialForm<FormType>,
@@ -38,7 +34,7 @@ function requiredWithBirthDateCondition(
 
 const schema: FormSchema = {
     fields: (): FormSchemaFields => ({
-        firstName: [testCondition],
+        firstName: [],
         lastName: [],
         birthDate: [],
         birthPlace: [requiredWithBirthDateCondition],
@@ -49,7 +45,7 @@ const schema: FormSchema = {
 };
 
 const defaultFormValues: PartialForm<FormType> = {
-    birthDate: 'Hello world',
+    birthDate: '2012-10-21',
 };
 
 export const Default = () => {

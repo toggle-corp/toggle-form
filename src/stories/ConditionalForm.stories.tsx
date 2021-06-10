@@ -44,10 +44,6 @@ const schema: FormSchema = {
         }
         return baseSchema;
     },
-    fieldDependencies: () => ({
-        firstName: ['lastName', 'address'],
-        lastName: ['firstName'],
-    }),
 };
 
 const defaultFormValues: PartialForm<FormType> = {};

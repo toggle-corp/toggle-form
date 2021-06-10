@@ -11,7 +11,7 @@ export type Schema<T, V=T> = (
           )
 );
 
-export type LiteralSchema<T, V> = ((value: T, allvalue: V) => string | undefined)[];
+export type LiteralSchema<T, V> = ((value: T, baseValue: V) => string | undefined)[];
 
 export type ArraySchema<T, V=T> = {
     validation?: (value: T[] | undefined) => string | undefined;
@@ -61,6 +61,7 @@ export function accumulateValues<T>(
 export function accumulateErrors<T>(
     obj: T,
     schema: Schema<T>,
+    // value: T,
 ): Error<T> | undefined;
 
 export function accumulateDifferentialErrors<T>(
@@ -68,6 +69,7 @@ export function accumulateDifferentialErrors<T>(
     newObj: T,
     oldError: Error<T> | undefined,
     schema: Schema<T>,
+    // value: T,
 ): Error<T> | undefined;
 
 export function analyzeErrors<T>(errors: ArrayError<T> | ObjectError<T> | LeafError): boolean;
