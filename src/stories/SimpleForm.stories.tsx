@@ -41,7 +41,8 @@ const schemaWithCustomValidation: FormSchema = {
     }),
     validation: (value) => {
         if (
-            value.password
+            value
+            && value.password
             && value.confirmPassword
             && value.password !== value.confirmPassword
         ) {

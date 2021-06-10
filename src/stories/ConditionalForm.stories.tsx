@@ -34,7 +34,7 @@ const schema: FormSchema = {
             age: [nullCondition],
             address: [nullCondition],
         };
-        if (value.detailed) {
+        if (value?.detailed) {
             baseSchema = {
                 ...baseSchema,
                 job: [],

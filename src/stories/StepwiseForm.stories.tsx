@@ -35,14 +35,14 @@ const schema: FormSchema = {
             age: [nullCondition],
             address: [nullCondition],
         };
-        if (value.step === 1) {
+        if (value?.step === 1) {
             baseSchema = {
                 ...baseSchema,
                 firstName: [requiredStringCondition],
                 lastName: [],
             };
         }
-        if (value.step === 2) {
+        if (value?.step === 2) {
             baseSchema = {
                 ...baseSchema,
                 job: [requiredStringCondition],
