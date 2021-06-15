@@ -5,35 +5,11 @@ import filesize from 'rollup-plugin-filesize';
 import { eslint } from 'rollup-plugin-eslint';
 import copy from 'rollup-plugin-copy';
 
-/*
-import postcss from 'rollup-plugin-postcss';
-import stylelint from 'rollup-plugin-stylelint';
-import postcssPresetEnv from 'postcss-preset-env';
-import postcssNested from 'postcss-nested';
-import postcssNormalize from 'postcss-normalize';
-*/
-
 import pkg from './package.json';
 
 const INPUT_FILE_PATH = 'src/index.ts';
 
 const PLUGINS = [
-    /*
-    stylelint(),
-    postcss({
-        extract: true,
-        modules: {
-            localsConvention: 'camelCaseOnly',
-        },
-        autoModules: false,
-        plugins: [
-            // autoprefixer,
-            postcssPresetEnv,
-            postcssNested,
-            postcssNormalize,
-        ],
-    }),
-    */
     eslint({
         throwOnError: true,
         include: ['**/*.jsx', '**/*.js', '**/*.ts', '**/*.tsx'],

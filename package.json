@@ -18,7 +18,7 @@
         "prepack": "yarn build",
         "watch": "rollup -c -w",
         "typecheck": "tsc",
-        "lint": "eslint --rule 'import/no-unresolved: 0' 'src/**/*.[tj]s?(x)'",
+        "lint": "eslint 'src/**/*.[tj]s?(x)'",
         "storybook": "start-storybook -p 6006",
         "build-storybook": "build-storybook",
         "chromatic": "npx chromatic --exit-zero-on-changes"
