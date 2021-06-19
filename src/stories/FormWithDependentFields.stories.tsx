@@ -57,15 +57,9 @@ export const Default = () => {
         error: riskyError,
         setFieldValue,
         validate,
-<<<<<<< HEAD
-        onErrorSet,
-        onValueSet,
-    } = useForm(schema, defaultFormValues);
-=======
         setError,
         setValue,
-    } = useForm(defaultFormValues, schema);
->>>>>>> b84e1a7 (Rename handler names)
+    } = useForm(schema, defaultFormValues);
 
     const handleSubmit = useCallback(
         (finalValues: PartialForm<FormType>) => {

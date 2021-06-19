@@ -1,9 +1,10 @@
 import { isValidUrl as isValidRemoteUrl, isNotDefined } from '@togglecorp/fujs';
-import { StateArg, internal } from './types';
+import { SetValueArg, internal } from './types';
 import type { ObjectError, ArrayError } from './schema';
 
 const localhostRegex = /(?<=\/\/)localhost(?=[:/]|$)/;
 
+// FIXME: move this to another helper
 export function getErrorObject<T>(
     value: ObjectError<T> | string | undefined,
 ): ObjectError<T> | undefined
@@ -24,6 +25,7 @@ export function getErrorObject<T>(
     return value;
 }
 
+// FIXME: move this to another helper
 export function getErrorString<T>(
     value: ArrayError<T> | ObjectError<T> | string | undefined,
 ) {
@@ -48,6 +50,6 @@ export function isValidUrl(url: string | undefined): url is string {
     return isValidRemoteUrl(sanitizedUrl);
 }
 
-export function isCallable<T>(value: StateArg<T>): value is (oldVal: T) => T {
+export function isCallable<T>(value: SetValueArg<T>): value is (oldVal: T) => T {
     return typeof value === 'function';
 }

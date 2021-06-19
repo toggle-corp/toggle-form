@@ -68,4 +68,5 @@ export function accumulateDifferentialErrors<T>(
 
 export function analyzeErrors<T>(errors: ArrayError<T> | ObjectError<T> | LeafError): boolean;
 
+// FIXME: mvoe to another helper
 export function removeNull<T>(data: T | undefined | null): PurgeNull<T>;

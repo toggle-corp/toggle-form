@@ -8,7 +8,7 @@ import {
 import { randomString } from '@togglecorp/fujs';
 
 import useForm, { createSubmitHandler, useFormArray, useFormObject } from '../form';
-import type { PartialForm as RawPartialForm, StateArg } from '../types';
+import type { PartialForm as RawPartialForm, SetValueArg } from '../types';
 import type { Error, ObjectSchema, ArraySchema } from '../schema';
 import FormContainer, { Row } from './FormContainer';
 import {
@@ -19,7 +19,7 @@ import {
 import { getErrorObject } from '../utils';
 import { internal } from '../types';
 
-type PartialForm<T> = RawPartialForm<T, { clientId: string }>;
+type PartialForm<T> = RawPartialForm<T, 'clientId'>;
 
 type FormType = {
     name?: string;
@@ -73,7 +73,7 @@ interface MetaInputProps<K extends string | number> {
    name: K,
    value: MetaInputValue,
    error: Error<MetaType> | undefined;
-   onChange: (value: StateArg<MetaInputValue> | undefined, name: K) => void;
+   onChange: (value: SetValueArg<MetaInputValue> | undefined, name: K) => void;
 }
 const defaultMetaValue: NonNullable<MetaInputValue> = {};
 function MetaInput<K extends string | number>(props: MetaInputProps<K>) {
@@ -117,7 +117,7 @@ const defaultCollectionValue: PartialForm<CollectionType> = {
 interface CollectionInputProps {
    value: PartialForm<CollectionType>,
    error: Error<CollectionType> | undefined;
-   onChange: (value: StateArg<PartialForm<CollectionType>>, index: number) => void;
+   onChange: (value: SetValueArg<PartialForm<CollectionType>>, index: number) => void;
    onRemove: (index: number) => void;
    index: number,
 }

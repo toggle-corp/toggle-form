@@ -13,13 +13,13 @@ import {
 
 import type { Schema, Error } from './schema';
 import type {
-    StateArg,
+    SetValueArg,
     EntriesAsKeyValue,
     EntriesAsList,
 } from './types';
 import { isCallable } from './utils';
 
-type ValidateReturn<T> = () => (
+type ValidateFunc<T> = () => (
     { errored: true, error: Error<T>, value: undefined }
     | { errored: false, value: T, error: undefined }
 )
@@ -34,16 +34,26 @@ function useForm<T extends object>(
     value: T,
     error: Error<T> | undefined,
     pristine: boolean,
-    validate: ValidateReturn<T>,
+    validate: ValidateFunc<T>,
 
     setPristine: (pristine: boolean) => void,
     setError: (errors: Error<T> | undefined) => void,
-    setValue: (value: StateArg<T>, doNotReset?: boolean) => void,
+    setValue: (value: SetValueArg<T>, doNotReset?: boolean) => void,
     setFieldValue: (...entries: EntriesAsList<T>) => void,
 } {
-    type ErrorAction = { type: 'SET_ERROR', error: Error<T> | undefined };
-    type ValueAction = { type: 'SET_VALUE', value: T | ((oldVal: T) => T), doNotReset: boolean | undefined };
-    type PristineAction = { type: 'SET_PRISTINE', value: boolean };
+    interface ErrorAction {
+        type: 'SET_ERROR';
+        error: Error<T> | undefined;
+    }
+    interface ValueAction {
+        type: 'SET_VALUE';
+        value: T | ((oldVal: T) => T);
+        doNotReset: boolean | undefined;
+    }
+    interface PristineAction {
+        type: 'SET_PRISTINE';
+        value: boolean;
+    }
     type ValueFieldAction = EntriesAsKeyValue<T> & { type: 'SET_VALUE_FIELD' };
 
     const formReducer = useCallback(
@@ -51,6 +61,20 @@ function useForm<T extends object>(
             prevState: { value: T, error: Error<T> | undefined, pristine: boolean },
             action: ValueFieldAction | ErrorAction | ValueAction | PristineAction,
         ) => {
+            if (action.type === 'SET_PRISTINE') {
+                const { value } = action;
+                return {
+                    ...prevState,
+                    pristine: value,
+                };
+            }
+            if (action.type === 'SET_ERROR') {
+                const { error } = action;
+                return {
+                    ...prevState,
+                    error,
+                };
+            }
             if (action.type === 'SET_VALUE') {
                 const {
                     value: valueFromAction,
@@ -72,20 +96,6 @@ function useForm<T extends object>(
                     value: newVal,
                     error: undefined,
                     pristine: true,
-                };
-            }
-            if (action.type === 'SET_PRISTINE') {
-                const { value } = action;
-                return {
-                    ...prevState,
-                    pristine: value,
-                };
-            }
-            if (action.type === 'SET_ERROR') {
-                const { error } = action;
-                return {
-                    ...prevState,
-                    error,
                 };
             }
             if (action.type === 'SET_VALUE_FIELD') {
@@ -157,7 +167,7 @@ function useForm<T extends object>(
     );
 
     const setValue = useCallback(
-        (value: StateArg<T>, doNotReset) => {
+        (value: SetValueArg<T>, doNotReset) => {
             const action: ValueAction = {
                 type: 'SET_VALUE',
                 value,
@@ -170,18 +180,19 @@ function useForm<T extends object>(
 
     const setFieldValue = useCallback(
         (...entries: EntriesAsList<T>) => {
+            const [value, key] = entries;
             const action: ValueFieldAction = {
                 type: 'SET_VALUE_FIELD',
-                key: entries[1],
-                value: entries[0],
+                key,
+                value,
             };
             dispatch(action);
         },
         [],
     );
 
-    const validate = useCallback(
-        (): ReturnType<ValidateReturn<T>> => {
+    const validate: ValidateFunc<T> = useCallback(
+        () => {
             const stateErrors = accumulateErrors(state.value, schema);
             const stateErrored = analyzeErrors(stateErrors);
             if (stateErrored) {
@@ -214,14 +225,14 @@ function useForm<T extends object>(
 // eslint-disable-next-line @typescript-eslint/ban-types
 export function useFormObject<K extends string | number, T extends object | undefined>(
     name: K,
-    onChange: (value: StateArg<T>, name: K) => void,
+    onChange: (value: SetValueArg<T>, name: K) => void,
+    // TODO: maybe make defaultValue callable
     defaultValue: NonNullable<T>,
 ) {
     const setFieldValue = useCallback(
         (...entries: EntriesAsList<NonNullable<T>>) => {
             // NOTE: may need to cast callableValue here
-            const callableValue = entries[0];
-            const key = entries[1];
+            const [callableValue, key] = entries;
             onChange(
                 (oldValue: T): T => {
                     const baseValue = oldValue ?? defaultValue;
@@ -245,12 +256,12 @@ export function useFormObject<K extends string | number, T extends object | unde
 export function useFormArray<K extends string, T extends object>(
     name: K,
     onChange: (
-        newValue: StateArg<T[] | undefined>,
+        newValue: SetValueArg<T[] | undefined>,
         inputName: K,
     ) => void,
 ) {
     const setValue = useCallback(
-        (val: StateArg<T>, index: number) => {
+        (val: SetValueArg<T>, index: number) => {
             onChange(
                 (oldValue: T[] | undefined): T[] | undefined => {
                     if (!oldValue) {
@@ -288,6 +299,7 @@ export function useFormArray<K extends string, T extends object>(
     return { setValue, removeValue };
 }
 
+// FIXME: move this to helper
 export function createSubmitHandler<T>(
     validator: () => ({ errored: boolean, error: Error<T> | undefined, value: T | undefined }),
     setError: (errors: Error<T> | undefined) => void,

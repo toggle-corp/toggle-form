@@ -38,5 +38,5 @@ export type {
     PurgeNull,
     EntriesAsList,
     EntriesAsKeyValue,
-    StateArg,
+    SetValueArg,
 } from './types';
