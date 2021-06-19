@@ -37,10 +37,10 @@ The return value from `useForm` hooks are as follows:
 |pristine|The pristine state of the form|
 |pristine|Defines if the form is pristine|
 |validate|If there are errors, sets form error else returns sanitized value|
-|onPristineSet|Function to set form's pristine state|
-|onErrorSet|Function to set form's error state|
-|onValueSet|Function to set form's value, error is cleared and pristine is set to true|
-|onValueChange|Function to set form field's value and pristine is set to false|
+|setPristine|Function to set form's pristine state|
+|setError|Function to set form's error state|
+|setValue|Function to set form's value, error is cleared and pristine is set to true|
+|setFieldValue|Function to set form field's value and pristine is set to false|
 
 ### useFormObject
 
@@ -70,8 +70,8 @@ The return value from `useFormArray` are as follows:
 
 |value|description|
 |----|----|
-|onValueChange|The change handler for the array items.|
-|onValueRemove|The delete handler for the array items.|
+|setValue|The change handler for the array items.|
+|removeValue|The delete handler for the array items.|
 
 ### Schema
 

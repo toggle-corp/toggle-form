@@ -55,16 +55,16 @@ export const Default = () => {
         pristine,
         value,
         error: riskyError,
-        onValueChange,
+        setFieldValue,
         validate,
-        onErrorSet,
-        onValueSet,
+        setError,
+        setValue,
     } = useForm(schema, defaultFormValues);
 
     const handleSubmit = useCallback(
         (finalValues: PartialForm<FormType>) => {
-            onValueSet(finalValues);
-        }, [onValueSet],
+            setValue(finalValues);
+        }, [setValue],
     );
 
     const error = getErrorObject(riskyError);
@@ -72,7 +72,7 @@ export const Default = () => {
     return (
         <FormContainer value={value}>
             <form
-                onSubmit={createSubmitHandler(validate, onErrorSet, handleSubmit)}
+                onSubmit={createSubmitHandler(validate, setError, handleSubmit)}
             >
                 <p>
                     {error?.[internal]}
@@ -81,21 +81,21 @@ export const Default = () => {
                     label="First Name *"
                     name="firstName"
                     value={value.firstName}
-                    onChange={onValueChange}
+                    onChange={setFieldValue}
                     error={error?.firstName}
                 />
                 <TextInput
                     label="Last Name"
                     name="lastName"
                     value={value.lastName}
-                    onChange={onValueChange}
+                    onChange={setFieldValue}
                     error={error?.lastName}
                 />
                 <Checkbox
                     label="I can add more details"
                     name="detailed"
                     value={value.detailed}
-                    onChange={onValueChange}
+                    onChange={setFieldValue}
                     // error={error?.detailed}
                 />
                 {value.detailed && (
@@ -104,21 +104,21 @@ export const Default = () => {
                             label="Address *"
                             name="address"
                             value={value.address}
-                            onChange={onValueChange}
+                            onChange={setFieldValue}
                             error={error?.address}
                         />
                         <NumberInput
                             label="Age *"
                             name="age"
                             value={value.age}
-                            onChange={onValueChange}
+                            onChange={setFieldValue}
                             error={error?.age}
                         />
                         <TextInput
                             label="Job"
                             name="job"
                             value={value.job}
-                            onChange={onValueChange}
+                            onChange={setFieldValue}
                             error={error?.job}
                         />
                     </>

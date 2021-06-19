@@ -82,16 +82,16 @@ export const Default = () => {
         pristine,
         value,
         error: riskyError,
-        onValueChange,
+        setFieldValue,
         validate,
-        onErrorSet,
-        onValueSet,
+        setError,
+        setValue,
     } = useForm(schema, defaultFormValues);
 
     const handleSubmit = useCallback(
         (finalValues: PartialForm<FormType>) => {
-            onValueSet(finalValues);
-        }, [onValueSet],
+            setValue(finalValues);
+        }, [setValue],
     );
 
     const error = getErrorObject(riskyError);
@@ -99,7 +99,7 @@ export const Default = () => {
     return (
         <FormContainer value={value}>
             <form
-                onSubmit={createSubmitHandler(validate, onErrorSet, handleSubmit)}
+                onSubmit={createSubmitHandler(validate, setError, handleSubmit)}
             >
                 <p>
                     {error?.[internal]}
@@ -108,7 +108,7 @@ export const Default = () => {
                     label="Username"
                     name="username"
                     value={value.username}
-                    onChange={onValueChange}
+                    onChange={setFieldValue}
                     error={error?.username}
                 />
                 <MultiSelectInput
@@ -116,7 +116,7 @@ export const Default = () => {
                     name="interests"
                     options={options}
                     value={value.interests}
-                    onChange={onValueChange}
+                    onChange={setFieldValue}
                     keySelector={(d) => d.key}
                     labelSelector={(d) => d.label}
                     error={getErrorString(error?.interests)}
@@ -125,7 +125,7 @@ export const Default = () => {
                     label="Password"
                     name="password"
                     value={value.password}
-                    onChange={onValueChange}
+                    onChange={setFieldValue}
                     error={error?.password}
                 />
                 <Button
@@ -146,16 +146,16 @@ export const WithValidation = () => {
         pristine,
         value,
         error: riskyError,
-        onValueChange,
+        setFieldValue,
         validate,
-        onErrorSet,
-        onValueSet,
+        setError,
+        setValue,
     } = useForm(schemaWithValidation, defaultFormValues);
 
     const handleSubmit = useCallback(
         (finalValues: PartialForm<FormType>) => {
-            onValueSet(finalValues);
-        }, [onValueSet],
+            setValue(finalValues);
+        }, [setValue],
     );
 
     const error = getErrorObject(riskyError);
@@ -163,7 +163,7 @@ export const WithValidation = () => {
     return (
         <FormContainer value={value}>
             <form
-                onSubmit={createSubmitHandler(validate, onErrorSet, handleSubmit)}
+                onSubmit={createSubmitHandler(validate, setError, handleSubmit)}
             >
                 <p>
                     {error?.[internal]}
@@ -172,7 +172,7 @@ export const WithValidation = () => {
                     label="Username *"
                     name="username"
                     value={value.username}
-                    onChange={onValueChange}
+                    onChange={setFieldValue}
                     error={error?.username}
                 />
                 <MultiSelectInput
@@ -180,7 +180,7 @@ export const WithValidation = () => {
                     name="interests"
                     options={options}
                     value={value.interests}
-                    onChange={onValueChange}
+                    onChange={setFieldValue}
                     keySelector={(d) => d.key}
                     labelSelector={(d) => d.label}
                     error={getErrorString(error?.interests)}
@@ -189,7 +189,7 @@ export const WithValidation = () => {
                     label="Password *"
                     name="password"
                     value={value.password}
-                    onChange={onValueChange}
+                    onChange={setFieldValue}
                     error={error?.password}
                 />
                 <Button
@@ -210,16 +210,16 @@ export const WithCustomValidation = () => {
         pristine,
         value,
         error: riskyError,
-        onValueChange,
+        setFieldValue,
         validate,
-        onErrorSet,
-        onValueSet,
+        setError,
+        setValue,
     } = useForm(schemaWithCustomValidation, defaultFormValues);
 
     const handleSubmit = useCallback(
         (finalValues: PartialForm<FormType>) => {
-            onValueSet(finalValues);
-        }, [onValueSet],
+            setValue(finalValues);
+        }, [setValue],
     );
 
     const error = getErrorObject(riskyError);
@@ -227,7 +227,7 @@ export const WithCustomValidation = () => {
     return (
         <FormContainer value={value}>
             <form
-                onSubmit={createSubmitHandler(validate, onErrorSet, handleSubmit)}
+                onSubmit={createSubmitHandler(validate, setError, handleSubmit)}
             >
                 <p>
                     {error?.[internal]}
@@ -236,7 +236,7 @@ export const WithCustomValidation = () => {
                     label="Username *"
                     name="username"
                     value={value.username}
-                    onChange={onValueChange}
+                    onChange={setFieldValue}
                     error={error?.username}
                 />
                 <MultiSelectInput
@@ -244,7 +244,7 @@ export const WithCustomValidation = () => {
                     name="interests"
                     options={options}
                     value={value.interests}
-                    onChange={onValueChange}
+                    onChange={setFieldValue}
                     keySelector={(d) => d.key}
                     labelSelector={(d) => d.label}
                     error={getErrorString(error?.interests)}
@@ -253,14 +253,14 @@ export const WithCustomValidation = () => {
                     label="Password *"
                     name="password"
                     value={value.password}
-                    onChange={onValueChange}
+                    onChange={setFieldValue}
                     error={error?.password}
                 />
                 <PasswordInput
                     label="Confirm Password *"
                     name="confirmPassword"
                     value={value.confirmPassword}
-                    onChange={onValueChange}
+                    onChange={setFieldValue}
                     error={error?.confirmPassword}
                 />
                 <Button

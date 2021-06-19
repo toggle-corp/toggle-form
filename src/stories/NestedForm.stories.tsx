@@ -175,16 +175,16 @@ export const Default = () => {
         pristine,
         value,
         error: riskyError,
-        onValueChange,
+        setFieldValue,
         validate,
-        onErrorSet,
-        onValueSet,
+        setError,
+        setValue,
     } = useForm(schema, defaultFormValues);
 
     const handleSubmit = useCallback(
         (finalValues: PartialForm<FormType>) => {
-            onValueSet(finalValues);
-        }, [onValueSet],
+            setValue(finalValues);
+        }, [setValue],
     );
 
     const error = getErrorObject(riskyError);
@@ -193,9 +193,9 @@ export const Default = () => {
     type Collections = typeof value.collections;
 
     const {
-        onValueChange: onCollectionChange,
-        onValueRemove: onCollectionRemove,
-    } = useFormArray('collections', onValueChange);
+        setValue: onCollectionChange,
+        removeValue: onCollectionRemove,
+    } = useFormArray('collections', setFieldValue);
 
     const handleCollectionAdd = useCallback(
         () => {
@@ -203,20 +203,20 @@ export const Default = () => {
             const newCollection: PartialForm<CollectionType> = {
                 clientId,
             };
-            onValueChange(
+            setFieldValue(
                 (oldValue: PartialForm<Collections>) => (
                     [...(oldValue ?? []), newCollection]
                 ),
                 'collections' as const,
             );
         },
-        [onValueChange],
+        [setFieldValue],
     );
 
     return (
         <FormContainer value={value}>
             <form
-                onSubmit={createSubmitHandler(validate, onErrorSet, handleSubmit)}
+                onSubmit={createSubmitHandler(validate, setError, handleSubmit)}
             >
                 <p>
                     {error?.[internal]}
@@ -225,13 +225,13 @@ export const Default = () => {
                     label="Name *"
                     name="name"
                     value={value.name}
-                    onChange={onValueChange}
+                    onChange={setFieldValue}
                     error={error?.name}
                 />
                 <MetaInput
                     name="meta"
                     value={value.meta}
-                    onChange={onValueChange}
+                    onChange={setFieldValue}
                     error={error?.meta}
                 />
                 <Row>

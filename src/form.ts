@@ -35,13 +35,14 @@ function useForm<T extends object>(
     error: Error<T> | undefined,
     pristine: boolean,
     validate: ValidateReturn<T>,
-    onPristineSet: (pristine: boolean) => void,
-    onErrorSet: (errors: Error<T> | undefined) => void,
-    onValueSet: (value: StateArg<T>) => void,
-    onValueChange: (...entries: EntriesAsList<T>) => void,
+
+    setPristine: (pristine: boolean) => void,
+    setError: (errors: Error<T> | undefined) => void,
+    setValue: (value: StateArg<T>, doNotReset?: boolean) => void,
+    setFieldValue: (...entries: EntriesAsList<T>) => void,
 } {
     type ErrorAction = { type: 'SET_ERROR', error: Error<T> | undefined };
-    type ValueAction = { type: 'SET_VALUE', value: T | ((oldVal: T) => T) };
+    type ValueAction = { type: 'SET_VALUE', value: T | ((oldVal: T) => T), doNotReset: boolean | undefined };
     type PristineAction = { type: 'SET_PRISTINE', value: boolean };
     type ValueFieldAction = EntriesAsKeyValue<T> & { type: 'SET_VALUE_FIELD' };
 
@@ -51,11 +52,21 @@ function useForm<T extends object>(
             action: ValueFieldAction | ErrorAction | ValueAction | PristineAction,
         ) => {
             if (action.type === 'SET_VALUE') {
-                const { value: valueFromAction } = action;
+                const {
+                    value: valueFromAction,
+                    doNotReset,
+                } = action;
 
                 const newVal = isCallable(valueFromAction)
                     ? valueFromAction(prevState.value)
                     : valueFromAction;
+
+                if (doNotReset) {
+                    return {
+                        ...prevState,
+                        value: newVal,
+                    };
+                }
 
                 return {
                     value: newVal,
@@ -146,17 +157,18 @@ function useForm<T extends object>(
     );
 
     const setValue = useCallback(
-        (value: StateArg<T>) => {
+        (value: StateArg<T>, doNotReset) => {
             const action: ValueAction = {
                 type: 'SET_VALUE',
                 value,
+                doNotReset,
             };
             dispatch(action);
         },
         [],
     );
 
-    const setValueField = useCallback(
+    const setFieldValue = useCallback(
         (...entries: EntriesAsList<T>) => {
             const action: ValueFieldAction = {
                 type: 'SET_VALUE_FIELD',
@@ -190,10 +202,11 @@ function useForm<T extends object>(
         value: state.value,
         error: state.error,
         pristine: state.pristine,
-        onErrorSet: setError,
-        onValueSet: setValue,
-        onValueChange: setValueField,
-        onPristineSet: setPristine,
+
+        setError,
+        setValue,
+        setFieldValue,
+        setPristine,
         validate,
     };
 }
@@ -204,7 +217,7 @@ export function useFormObject<K extends string | number, T extends object | unde
     onChange: (value: StateArg<T>, name: K) => void,
     defaultValue: NonNullable<T>,
 ) {
-    const onValueChange = useCallback(
+    const setFieldValue = useCallback(
         (...entries: EntriesAsList<NonNullable<T>>) => {
             // NOTE: may need to cast callableValue here
             const callableValue = entries[0];
@@ -225,7 +238,7 @@ export function useFormObject<K extends string | number, T extends object | unde
         [name, defaultValue, onChange],
     );
 
-    return onValueChange;
+    return setFieldValue;
 }
 
 // eslint-disable-next-line @typescript-eslint/ban-types
@@ -236,7 +249,7 @@ export function useFormArray<K extends string, T extends object>(
         inputName: K,
     ) => void,
 ) {
-    const onValueChange = useCallback(
+    const setValue = useCallback(
         (val: StateArg<T>, index: number) => {
             onChange(
                 (oldValue: T[] | undefined): T[] | undefined => {
@@ -255,7 +268,7 @@ export function useFormArray<K extends string, T extends object>(
         [name, onChange],
     );
 
-    const onValueRemove = useCallback(
+    const removeValue = useCallback(
         (index: number) => {
             onChange(
                 (oldValue: T[] | undefined): T[] | undefined => {
@@ -272,7 +285,7 @@ export function useFormArray<K extends string, T extends object>(
         [name, onChange],
     );
 
-    return { onValueChange, onValueRemove };
+    return { setValue, removeValue };
 }
 
 export function createSubmitHandler<T>(

@@ -55,16 +55,22 @@ export const Default = () => {
         pristine,
         value,
         error: riskyError,
-        onValueChange,
+        setFieldValue,
         validate,
+<<<<<<< HEAD
         onErrorSet,
         onValueSet,
     } = useForm(schema, defaultFormValues);
+=======
+        setError,
+        setValue,
+    } = useForm(defaultFormValues, schema);
+>>>>>>> b84e1a7 (Rename handler names)
 
     const handleSubmit = useCallback(
         (finalValues: PartialForm<FormType>) => {
-            onValueSet(finalValues);
-        }, [onValueSet],
+            setValue(finalValues);
+        }, [setValue],
     );
 
     const error = getErrorObject(riskyError);
@@ -72,7 +78,7 @@ export const Default = () => {
     return (
         <FormContainer value={value}>
             <form
-                onSubmit={createSubmitHandler(validate, onErrorSet, handleSubmit)}
+                onSubmit={createSubmitHandler(validate, setError, handleSubmit)}
             >
                 <p>
                     {error?.[internal]}
@@ -81,28 +87,28 @@ export const Default = () => {
                     label="First name"
                     name="firstName"
                     value={value.firstName}
-                    onChange={onValueChange}
+                    onChange={setFieldValue}
                     error={error?.firstName}
                 />
                 <TextInput
                     label="Last name"
                     name="lastName"
                     value={value.lastName}
-                    onChange={onValueChange}
+                    onChange={setFieldValue}
                     error={error?.lastName}
                 />
                 <DateInput
                     label="Birth date"
                     name="birthDate"
                     value={value.birthDate}
-                    onChange={onValueChange}
+                    onChange={setFieldValue}
                     error={error?.birthDate}
                 />
                 <TextInput
                     label="Birth place"
                     name="birthPlace"
                     value={value.birthPlace}
-                    onChange={onValueChange}
+                    onChange={setFieldValue}
                     error={error?.birthPlace}
                 />
                 <Button
