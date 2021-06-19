@@ -2246,13 +2246,12 @@
   dependencies:
     "@babel/runtime" "^7.7.7"
 
-"@togglecorp/toggle-ui@^0.9.0":
-  version "0.9.0"
-  resolved "https://registry.yarnpkg.com/@togglecorp/toggle-ui/-/toggle-ui-0.9.0.tgz#463175eeb568ea11c0eb6bcbe30fa20a84f5a0c1"
-  integrity sha512-aFEVvBWHKuPLr0hlGg3+4P4kE8J4dEZeV+OUgVk72f2tZsvx6+hkNwpCJlT5anED5MgW6nIN8VcWSm+F+MRACQ==
+"@togglecorp/toggle-ui@^0.10.1":
+  version "0.10.1"
+  resolved "https://registry.yarnpkg.com/@togglecorp/toggle-ui/-/toggle-ui-0.10.1.tgz#404e3a858f36b10bbb9a560028cd0fdde7e1af95"
+  integrity sha512-pZUGb8BROOmrRx97ZEDR6ZHIWhXKSEnwq2xpobTGb9KviCdHB7WUAHn3RfCbkv1b+JjvLLN2/FkO+MODqgtyOg==
   dependencies:
     "@babel/runtime-corejs3" "^7.11.2"
-    "@storybook/client-api" "^6.0.21"
     "@togglecorp/fujs" "^1.9.2-beta.0"
     d3-axis "^2.0.0"
     d3-scale "^3.2.3"

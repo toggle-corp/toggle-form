@@ -3,18 +3,38 @@ import {
     Button,
     TextInput,
     PasswordInput,
+    MultiSelectInput,
 } from '@togglecorp/toggle-ui';
 
 import useForm, { createSubmitHandler } from '../form';
 import type { PartialForm } from '../types';
+import { internal } from '../types';
 import type { ObjectSchema } from '../schema';
 import FormContainer from './FormContainer';
-import { requiredStringCondition } from '../validation';
+import {
+    requiredStringCondition,
+    requiredListCondition,
+} from '../validation';
+import { getErrorObject, getErrorString } from '../utils';
+
+interface Option {
+    key: string;
+    label: string;
+}
+
+const options: Option[] = [
+    { key: '1', label: 'Music' },
+    { key: '2', label: 'Dance' },
+    { key: '3', label: 'Gardening' },
+    { key: '4', label: 'Pottery' },
+    { key: '5', label: 'Painting' },
+];
 
 type FormType = {
     username?: string;
     password?: string;
     confirmPassword?: string;
+    interests?: string[];
 };
 type FormSchema = ObjectSchema<PartialForm<FormType>>
 type FormSchemaFields = ReturnType<FormSchema['fields']>;
@@ -23,6 +43,7 @@ const schema: FormSchema = {
     fields: (): FormSchemaFields => ({
         username: [],
         password: [],
+        interests: [],
     }),
 };
 
@@ -30,6 +51,7 @@ const schemaWithValidation: FormSchema = {
     fields: (): FormSchemaFields => ({
         username: [requiredStringCondition],
         password: [requiredStringCondition],
+        interests: [requiredListCondition],
     }),
 };
 
@@ -38,6 +60,7 @@ const schemaWithCustomValidation: FormSchema = {
         username: [requiredStringCondition],
         password: [requiredStringCondition],
         confirmPassword: [requiredStringCondition],
+        interests: [requiredListCondition],
     }),
     validation: (value) => {
         if (
@@ -58,7 +81,7 @@ export const Default = () => {
     const {
         pristine,
         value,
-        error,
+        error: riskyError,
         onValueChange,
         validate,
         onErrorSet,
@@ -71,27 +94,39 @@ export const Default = () => {
         }, [onValueSet],
     );
 
+    const error = getErrorObject(riskyError);
+
     return (
         <FormContainer value={value}>
             <form
                 onSubmit={createSubmitHandler(validate, onErrorSet, handleSubmit)}
             >
                 <p>
-                    {error?.$internal}
+                    {error?.[internal]}
                 </p>
                 <TextInput
                     label="Username"
                     name="username"
                     value={value.username}
                     onChange={onValueChange}
-                    error={error?.fields?.username}
+                    error={error?.username}
+                />
+                <MultiSelectInput
+                    label="Interests"
+                    name="interests"
+                    options={options}
+                    value={value.interests}
+                    onChange={onValueChange}
+                    keySelector={(d) => d.key}
+                    labelSelector={(d) => d.label}
+                    error={getErrorString(error?.interests)}
                 />
                 <PasswordInput
                     label="Password"
                     name="password"
                     value={value.password}
                     onChange={onValueChange}
-                    error={error?.fields?.password}
+                    error={error?.password}
                 />
                 <Button
                     type="submit"
@@ -110,7 +145,7 @@ export const WithValidation = () => {
     const {
         pristine,
         value,
-        error,
+        error: riskyError,
         onValueChange,
         validate,
         onErrorSet,
@@ -123,27 +158,39 @@ export const WithValidation = () => {
         }, [onValueSet],
     );
 
+    const error = getErrorObject(riskyError);
+
     return (
         <FormContainer value={value}>
             <form
                 onSubmit={createSubmitHandler(validate, onErrorSet, handleSubmit)}
             >
                 <p>
-                    {error?.$internal}
+                    {error?.[internal]}
                 </p>
                 <TextInput
                     label="Username *"
                     name="username"
                     value={value.username}
                     onChange={onValueChange}
-                    error={error?.fields?.username}
+                    error={error?.username}
+                />
+                <MultiSelectInput
+                    label="Interests"
+                    name="interests"
+                    options={options}
+                    value={value.interests}
+                    onChange={onValueChange}
+                    keySelector={(d) => d.key}
+                    labelSelector={(d) => d.label}
+                    error={getErrorString(error?.interests)}
                 />
                 <PasswordInput
                     label="Password *"
                     name="password"
                     value={value.password}
                     onChange={onValueChange}
-                    error={error?.fields?.password}
+                    error={error?.password}
                 />
                 <Button
                     type="submit"
@@ -162,7 +209,7 @@ export const WithCustomValidation = () => {
     const {
         pristine,
         value,
-        error,
+        error: riskyError,
         onValueChange,
         validate,
         onErrorSet,
@@ -175,34 +222,46 @@ export const WithCustomValidation = () => {
         }, [onValueSet],
     );
 
+    const error = getErrorObject(riskyError);
+
     return (
         <FormContainer value={value}>
             <form
                 onSubmit={createSubmitHandler(validate, onErrorSet, handleSubmit)}
             >
                 <p>
-                    {error?.$internal}
+                    {error?.[internal]}
                 </p>
                 <TextInput
                     label="Username *"
                     name="username"
                     value={value.username}
                     onChange={onValueChange}
-                    error={error?.fields?.username}
+                    error={error?.username}
+                />
+                <MultiSelectInput
+                    label="Interests"
+                    name="interests"
+                    options={options}
+                    value={value.interests}
+                    onChange={onValueChange}
+                    keySelector={(d) => d.key}
+                    labelSelector={(d) => d.label}
+                    error={getErrorString(error?.interests)}
                 />
                 <PasswordInput
                     label="Password *"
                     name="password"
                     value={value.password}
                     onChange={onValueChange}
-                    error={error?.fields?.password}
+                    error={error?.password}
                 />
                 <PasswordInput
                     label="Confirm Password *"
                     name="confirmPassword"
                     value={value.confirmPassword}
                     onChange={onValueChange}
-                    error={error?.fields?.confirmPassword}
+                    error={error?.confirmPassword}
                 />
                 <Button
                     type="submit"

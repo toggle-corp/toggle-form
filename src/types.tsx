@@ -1,3 +1,5 @@
+export const internal = Symbol('Internal Error');
+
 // eslint-disable-next-line @typescript-eslint/ban-types
 export type PartialForm<T, J extends object = { uuid: string }> = T extends object ? (
     T extends (infer K)[] ? (

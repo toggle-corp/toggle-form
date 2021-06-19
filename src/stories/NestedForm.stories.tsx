@@ -16,6 +16,8 @@ import {
     requiredCondition,
     greaterThanCondition,
 } from '../validation';
+import { getErrorObject } from '../utils';
+import { internal } from '../types';
 
 type PartialForm<T> = RawPartialForm<T, { clientId: string }>;
 
@@ -33,41 +35,34 @@ type FormType = {
 };
 type FormSchema = ObjectSchema<PartialForm<FormType>>;
 type FormSchemaFields = ReturnType<FormSchema['fields']>;
-
 type MetaType = NonNullable<FormType['meta']>;
 type MetaSchema = ObjectSchema<PartialForm<MetaType>>;
 type MetaSchemaFields = ReturnType<MetaSchema['fields']>;
-const metaSchema: MetaSchema = {
-    fields: (): MetaSchemaFields => ({
-        age: [requiredCondition, greaterThanCondition(12)],
-        job: [],
-    }),
-};
-
 type CollectionType = NonNullable<NonNullable<FormType['collections']>>[number];
-
 type CollectionSchema = ObjectSchema<PartialForm<CollectionType>>;
 type CollectionSchemaFields = ReturnType<CollectionSchema['fields']>;
-const collectionSchema: CollectionSchema = {
-    fields: (): CollectionSchemaFields => ({
-        clientId: [],
-        date: [],
-        title: [requiredStringCondition],
-    }),
-};
-
 type CollectionsSchema = ArraySchema<PartialForm<CollectionType>>;
 type CollectionsSchemaMember = ReturnType<CollectionsSchema['member']>;
-const collectionsSchema: CollectionsSchema = {
-    keySelector: (col) => col.clientId,
-    member: (): CollectionsSchemaMember => collectionSchema,
-};
 
 const schema: FormSchema = {
     fields: (): FormSchemaFields => ({
         name: [requiredStringCondition],
-        meta: metaSchema,
-        collections: collectionsSchema,
+        meta: ({
+            fields: (): MetaSchemaFields => ({
+                age: [requiredCondition, greaterThanCondition(12)],
+                job: [],
+            }),
+        }),
+        collections: {
+            keySelector: (col) => col.clientId,
+            member: (): CollectionsSchemaMember => ({
+                fields: (): CollectionSchemaFields => ({
+                    clientId: [],
+                    date: [],
+                    title: [requiredStringCondition],
+                }),
+            }),
+        },
     }),
 };
 
@@ -85,30 +80,32 @@ function MetaInput<K extends string | number>(props: MetaInputProps<K>) {
     const {
         name,
         value,
-        error,
+        error: riskyError,
         onChange,
     } = props;
 
     const onFieldChange = useFormObject(name, onChange, defaultMetaValue);
 
+    const error = getErrorObject(riskyError);
+
     return (
         <>
             <p>
-                {error?.$internal}
+                {error?.[internal]}
             </p>
             <NumberInput
                 label="Age *"
                 name="age"
                 value={value?.age}
                 onChange={onFieldChange}
-                error={error?.fields?.age}
+                error={error?.age}
             />
             <TextInput
                 label="Job"
                 name="job"
                 value={value?.job}
                 onChange={onFieldChange}
-                error={error?.fields?.job}
+                error={error?.job}
             />
         </>
     );
@@ -127,13 +124,15 @@ interface CollectionInputProps {
 function CollectionInput(props: CollectionInputProps) {
     const {
         value,
-        error,
+        error: riskyError,
         onChange,
         onRemove,
         index,
     } = props;
 
     const onFieldChange = useFormObject(index, onChange, defaultCollectionValue);
+
+    const error = getErrorObject(riskyError);
 
     return (
         <>
@@ -151,21 +150,21 @@ function CollectionInput(props: CollectionInputProps) {
                 </Button>
             </Row>
             <p>
-                {error?.$internal}
+                {error?.[internal]}
             </p>
             <TextInput
                 label="Title *"
                 name="title"
                 value={value.title}
                 onChange={onFieldChange}
-                error={error?.fields?.title}
+                error={error?.title}
             />
             <DateInput
                 label="Date"
                 name="date"
                 value={value.date}
                 onChange={onFieldChange}
-                error={error?.fields?.date}
+                error={error?.date}
             />
         </>
     );
@@ -175,7 +174,7 @@ export const Default = () => {
     const {
         pristine,
         value,
-        error,
+        error: riskyError,
         onValueChange,
         validate,
         onErrorSet,
@@ -187,6 +186,9 @@ export const Default = () => {
             onValueSet(finalValues);
         }, [onValueSet],
     );
+
+    const error = getErrorObject(riskyError);
+    const arrayError = getErrorObject(error?.collections);
 
     type Collections = typeof value.collections;
 
@@ -217,20 +219,20 @@ export const Default = () => {
                 onSubmit={createSubmitHandler(validate, onErrorSet, handleSubmit)}
             >
                 <p>
-                    {error?.$internal}
+                    {error?.[internal]}
                 </p>
                 <TextInput
                     label="Name *"
                     name="name"
                     value={value.name}
                     onChange={onValueChange}
-                    error={error?.fields?.name}
+                    error={error?.name}
                 />
                 <MetaInput
                     name="meta"
                     value={value.meta}
                     onChange={onValueChange}
-                    error={error?.fields?.meta}
+                    error={error?.meta}
                 />
                 <Row>
                     <h3>
@@ -245,7 +247,7 @@ export const Default = () => {
                     </Button>
                 </Row>
                 <p>
-                    {error?.fields?.collections?.$internal}
+                    {arrayError?.[internal]}
                 </p>
                 {value.collections?.length ? (
                     value.collections.map((collection, index) => (
@@ -255,7 +257,7 @@ export const Default = () => {
                             value={collection}
                             onChange={onCollectionChange}
                             onRemove={onCollectionRemove}
-                            error={error?.fields?.collections?.members?.[collection.clientId]}
+                            error={arrayError?.[collection.clientId]}
                         />
                     ))
                 ) : (

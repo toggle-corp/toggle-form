@@ -7,9 +7,11 @@ import {
 
 import useForm, { createSubmitHandler } from '../form';
 import type { PartialForm } from '../types';
+import { internal } from '../types';
 import type { ObjectSchema } from '../schema';
 import FormContainer from './FormContainer';
-import { requiredStringCondition, requiredCondition, nullCondition } from '../validation';
+import { getErrorObject } from '../utils';
+import { requiredStringCondition, requiredCondition, forceNullType } from '../validation';
 
 type FormType = {
     step: number;
@@ -29,11 +31,11 @@ const schema: FormSchema = {
     fields: (value): FormSchemaFields => {
         let baseSchema: FormSchemaFields = {
             step: [],
-            firstName: [nullCondition],
-            lastName: [nullCondition],
-            job: [nullCondition],
-            age: [nullCondition],
-            address: [nullCondition],
+            firstName: [forceNullType],
+            lastName: [forceNullType],
+            job: [forceNullType],
+            age: [forceNullType],
+            address: [forceNullType],
         };
         if (value?.step === 1) {
             baseSchema = {
@@ -62,7 +64,7 @@ export const Default = () => {
     const {
         pristine,
         value,
-        error,
+        error: riskyError,
         onValueChange,
         validate,
         onErrorSet,
@@ -79,13 +81,15 @@ export const Default = () => {
         }, [onValueSet],
     );
 
+    const error = getErrorObject(riskyError);
+
     return (
         <FormContainer value={value}>
             <form
                 onSubmit={createSubmitHandler(validate, onErrorSet, handleSubmit)}
             >
                 <p>
-                    {error?.$internal}
+                    {error?.[internal]}
                 </p>
                 {value.step === 1 && (
                     <>
@@ -94,14 +98,14 @@ export const Default = () => {
                             name="firstName"
                             value={value.firstName}
                             onChange={onValueChange}
-                            error={error?.fields?.firstName}
+                            error={error?.firstName}
                         />
                         <TextInput
                             label="Last Name"
                             name="lastName"
                             value={value.lastName}
                             onChange={onValueChange}
-                            error={error?.fields?.lastName}
+                            error={error?.lastName}
                         />
                     </>
                 )}
@@ -112,21 +116,21 @@ export const Default = () => {
                             name="address"
                             value={value.address}
                             onChange={onValueChange}
-                            error={error?.fields?.address}
+                            error={error?.address}
                         />
                         <NumberInput
                             label="Age *"
                             name="age"
                             value={value.age}
                             onChange={onValueChange}
-                            error={error?.fields?.age}
+                            error={error?.age}
                         />
                         <TextInput
                             label="Job"
                             name="job"
                             value={value.job}
                             onChange={onValueChange}
-                            error={error?.fields?.job}
+                            error={error?.job}
                         />
                     </>
                 )}

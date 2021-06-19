@@ -105,35 +105,45 @@ The validation function accepts the current value and the overall form value.
 The validation function can either return a string or undefined; the string
 return value is interpreted as an error.
 
-> ⚠ These validation functions can also be used for objects and arrays. But, it's
-> better to use it for literals to keep the inferred typings correct.
+### Validation functions
 
-There are built in validation functions for required condition, email
-condition, url condition, greater than condition, less than condition and many
-more.
+The library provides these validation function:
+
+- requiredCondition
+- requiredStringCondition
+- requiredListCondition
+- blacklistCondition
+- whitelistCondition
+- lengthGreaterThanCondition
+- lengthSmallerThanCondition
+- greaterThanCondition
+- smallerThanCondition
+- greaterThanOrEqualToCondition
+- lessThanOrEqualToCondition
+- integerCondition
+- emailCondition
+- urlCondition
 
 #### Special validation functions
 
-##### nonNullType
-
-The form sets `null` to indicate there is no information. On special cases, we
-would want to set `undefined` instead of `null`. We can use `nonNullType` to
-get that behavior.
-
-##### nullType
+##### forceNullType
 
 Sometimes we would want to clear value for certain fields. We can use
-`nullType` to conditionally clear values.
+`forceNullType` to conditionally clear values.
 
-##### ⚠ arrayType
+##### forceEmptyArrayType
 
-For array type, we should add `arrayType` so that the typings for error and the
-actual error value will match.
+Sometimes we would want to clear value for certain fields. We can use
+`forceEmptyArrayType` to conditionally clear array values.
 
-##### ⚠ nonNullArrayType
+##### defaultUndefinedType
 
-For array type, we would want to set `[]` to indicate there is no information.
-We can use `nonNullArrayType` to get that behavior.
+The form sets `null` to indicate there is no information. On special cases, we
+would want to set `undefined` instead of `null`.
+
+##### defaultEmptyArrayType
+
+For array type, we would want to set `[]` to when there is no data.
 
 
 ## Development

@@ -7,12 +7,19 @@ import {
     isNotDefined,
     isDefined,
 } from '@togglecorp/fujs';
-import { idCondition, arrayCondition, nullCondition } from './validation';
+import { internal } from './types';
+import {
+    forceNullType,
+    forceEmptyArrayType,
+
+    defaultUndefinedType,
+    defaultEmptyArrayType,
+} from './validation';
 
 const emptyArray = [];
 
 const hasNoKeys = (obj) => (
-    isFalsy(obj) || Object.keys(obj).length === 0
+    isFalsy(obj) || (Object.keys(obj).length + Object.getOwnPropertySymbols(obj).length) === 0
 );
 
 const hasNoValues = (array) => (
@@ -39,18 +46,18 @@ export const accumulateValues = (obj, schema, settings = {}) => {
     const isSchemaForObject = !!fields;
 
     if (isSchemaForLeaf) {
-        if (schema.includes(nullCondition)) {
-            if (schema.includes(arrayCondition)) {
-                return [];
-            }
+        if (schema.includes(forceNullType)) {
             return null;
+        }
+        if (schema.includes(forceEmptyArrayType)) {
+            return [];
         }
         if (isNotDefined(obj)) {
             // id cannot be unset so setting null would be bad
-            if (schema.includes(idCondition)) {
+            if (schema.includes(defaultUndefinedType)) {
                 return undefined;
             }
-            if (schema.includes(arrayCondition)) {
+            if (schema.includes(defaultEmptyArrayType)) {
                 return [];
             }
             return nullable ? null : undefined;
@@ -109,11 +116,7 @@ export const accumulateErrors = (obj, schema, baseValue = obj) => {
         schema.every((rule) => {
             const message = rule(obj, baseValue);
             if (message) {
-                if (schema.includes(arrayCondition)) {
-                    error = { $internal: message };
-                } else {
-                    error = message;
-                }
+                error = message;
             }
             return !message;
         });
@@ -124,7 +127,7 @@ export const accumulateErrors = (obj, schema, baseValue = obj) => {
     if (validation) {
         const validationErrors = validation(obj);
         if (validationErrors) {
-            errors.$internal = validationErrors;
+            errors[internal] = validationErrors;
         }
     }
 
@@ -135,14 +138,11 @@ export const accumulateErrors = (obj, schema, baseValue = obj) => {
                 const fieldError = accumulateErrors(element, localMember, baseValue);
                 if (fieldError) {
                     const index = keySelector(element);
-                    if (!errors.members) {
-                        errors.members = {};
-                    }
-                    errors.members[index] = fieldError;
+                    errors[index] = fieldError;
                 }
             });
         }
-        return hasNoKeys(errors.members) && !errors.$internal ? undefined : errors;
+        return hasNoKeys(errors) ? undefined : errors;
     }
 
     if (isSchemaForObject) {
@@ -154,13 +154,10 @@ export const accumulateErrors = (obj, schema, baseValue = obj) => {
                 baseValue,
             );
             if (fieldError) {
-                if (!errors.fields) {
-                    errors.fields = {};
-                }
-                errors.fields[fieldName] = fieldError;
+                errors[fieldName] = fieldError;
             }
         });
-        return hasNoKeys(errors.fields) && !errors.$internal ? undefined : errors;
+        return hasNoKeys(errors) ? undefined : errors;
     }
 
     console.error('Accumulate Error: Schema is invalid for ', schema);
@@ -199,11 +196,7 @@ export const accumulateDifferentialErrors = (
         schema.every((rule) => {
             const message = rule(newObj, baseValue);
             if (message) {
-                if (schema.includes(arrayCondition)) {
-                    error = { $internal: message };
-                } else {
-                    error = message;
-                }
+                error = message;
             }
             return !message;
         });
@@ -214,7 +207,7 @@ export const accumulateDifferentialErrors = (
     if (validation) {
         const validationErrors = validation(newObj);
         if (validationErrors) {
-            errors.$internal = validationErrors;
+            errors[internal] = validationErrors;
         }
     }
 
@@ -226,11 +219,8 @@ export const accumulateDifferentialErrors = (
 
         unmodified.forEach((e) => {
             const index = keySelector(e);
-            if (oldError?.members?.[index]) {
-                if (!errors.members) {
-                    errors.members = {};
-                }
-                errors.members[index] = oldError?.members?.[index];
+            if (oldError?.[index]) {
+                errors[index] = oldError?.[index];
             }
         });
 
@@ -240,20 +230,17 @@ export const accumulateDifferentialErrors = (
             const fieldError = accumulateDifferentialErrors(
                 e.old,
                 e.new,
-                oldError?.members?.[index],
+                oldError?.[index],
                 localMember,
                 baseValue,
             );
 
             if (fieldError) {
-                if (!errors.members) {
-                    errors.members = {};
-                }
-                errors.members[index] = fieldError;
+                errors[index] = fieldError;
             }
         });
 
-        return hasNoKeys(errors.members) && !errors.$internal ? undefined : errors;
+        return hasNoKeys(errors) ? undefined : errors;
     }
 
     if (isSchemaForObject) {
@@ -267,11 +254,8 @@ export const accumulateDifferentialErrors = (
             const depsChanged = hasDepsChanged(dependencies?.[fieldName]);
 
             if (oldObj?.[fieldName] === newObj?.[fieldName] && !depsChanged) {
-                if (oldError?.fields?.[fieldName]) {
-                    if (!errors.fields) {
-                        errors.fields = {};
-                    }
-                    errors.fields[fieldName] = oldError?.fields?.[fieldName];
+                if (oldError?.[fieldName]) {
+                    errors[fieldName] = oldError?.[fieldName];
                 }
                 return;
             }
@@ -279,21 +263,18 @@ export const accumulateDifferentialErrors = (
             const fieldError = accumulateDifferentialErrors(
                 oldObj?.[fieldName],
                 newObj?.[fieldName],
-                oldError?.fields?.[fieldName],
+                oldError?.[fieldName],
                 localFields[fieldName],
                 baseValue,
                 true,
             );
 
             if (fieldError) {
-                if (!errors.fields) {
-                    errors.fields = {};
-                }
-                errors.fields[fieldName] = fieldError;
+                errors[fieldName] = fieldError;
             }
         });
 
-        return hasNoKeys(errors.fields) && !errors.$internal ? undefined : errors;
+        return hasNoKeys(errors) ? undefined : errors;
     }
 
     console.error('Accumulate Differential Error: Schema is invalid for ', schema);
@@ -308,42 +289,24 @@ export const analyzeErrors = (errors) => {
     if (typeof errors === 'string') {
         return !!errors;
     }
-    if (errors.$internal) {
+    if (errors[internal]) {
         return true;
     }
-    if (errors.fields) {
-        // handles empty object {}
-        const keys = Object.keys(errors.fields);
-        if (keys.length === 0) {
-            return false;
-        }
-        return keys.some((key) => {
-            const subErrors = errors.fields[key];
-            // handles object
-            if (isObject(subErrors)) {
-                return analyzeErrors(subErrors);
-            }
-            // handles string or array of strings
-            return isTruthy(subErrors);
-        });
+
+    // handles empty object {}
+    const keys = Object.keys(errors);
+    if (keys.length === 0) {
+        return false;
     }
-    if (errors.members) {
-        // handles empty object {}
-        const keys = Object.keys(errors.members);
-        if (keys.length === 0) {
-            return false;
+    return keys.some((key) => {
+        const subErrors = errors[key];
+        // handles object
+        if (isObject(subErrors)) {
+            return analyzeErrors(subErrors);
         }
-        return keys.some((key) => {
-            const subErrors = errors.members[key];
-            // handles object
-            if (isObject(subErrors)) {
-                return analyzeErrors(subErrors);
-            }
-            // handles string or array of strings
-            return isTruthy(subErrors);
-        });
-    }
-    return false;
+        // handles string or array of strings
+        return isTruthy(subErrors);
+    });
 };
 
 export function removeNull(data) {
