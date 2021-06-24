@@ -63,7 +63,7 @@ export const Default = () => {
         validate,
         onErrorSet,
         onValueSet,
-    } = useForm(defaultFormValues, schema);
+    } = useForm(schema, defaultFormValues);
 
     const handleSubmit = useCallback(
         (finalValues: PartialForm<FormType>) => {
@@ -115,7 +115,7 @@ export const WithValidation = () => {
         validate,
         onErrorSet,
         onValueSet,
-    } = useForm(defaultFormValues, schemaWithValidation);
+    } = useForm(schemaWithValidation, defaultFormValues);
 
     const handleSubmit = useCallback(
         (finalValues: PartialForm<FormType>) => {
@@ -167,7 +167,7 @@ export const WithCustomValidation = () => {
         validate,
         onErrorSet,
         onValueSet,
-    } = useForm(defaultFormValues, schemaWithCustomValidation);
+    } = useForm(schemaWithCustomValidation, defaultFormValues);
 
     const handleSubmit = useCallback(
         (finalValues: PartialForm<FormType>) => {
