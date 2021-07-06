@@ -26,8 +26,10 @@ type ValidateReturn<T> = () => (
 
 // eslint-disable-next-line @typescript-eslint/ban-types
 function useForm<T extends object>(
-    initialFormValue: T,
     schema: Schema<T>,
+    initialFormValue: T,
+    initialPristine = true,
+    initialError?: Error<T>,
 ): {
     value: T,
     error: Error<T> | undefined,
@@ -118,7 +120,7 @@ function useForm<T extends object>(
 
     const [state, dispatch] = useReducer(
         formReducer,
-        { value: initialFormValue, error: undefined, pristine: true },
+        { value: initialFormValue, error: initialError, pristine: initialPristine },
     );
 
     const setPristine = useCallback(
