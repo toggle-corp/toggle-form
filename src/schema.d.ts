@@ -1,4 +1,4 @@
-import { PurgeNull } from './types';
+import { PurgeNull, internal } from './types';
 
 export type Schema<T, V=T> = (
     Exclude<T, undefined> extends unknown[]
@@ -27,11 +27,11 @@ export type ObjectSchema<T, V=T> = {
 
 export type Error<T> = (
     Exclude<T, undefined> extends unknown[]
-        ? ArrayError<Exclude<T, undefined>[number]>
+        ? ArrayError<Exclude<T, undefined>[number]> | LeafError
         : (
             // eslint-disable-next-line @typescript-eslint/ban-types
             Exclude<T, undefined> extends object
-                ? ObjectError<Exclude<T, undefined>>
+                ? ObjectError<Exclude<T, undefined>> | LeafError
                 : LeafError
         )
 );
@@ -39,18 +39,12 @@ export type Error<T> = (
 export type LeafError = string | undefined;
 
 export type ArrayError<T> = {
-    $internal?: string;
-    members?: {
-        [key: string]: Error<T> | undefined;
-    }
-};
+    [key: string]: Error<T> | undefined;
+} & { [internal]?: string };
 
 export type ObjectError<T> = {
-    $internal?: string;
-    fields?: {
-        [K in keyof T]?: Error<T[K]> | undefined;
-    }
-};
+    [K in keyof T]?: Error<T[K]> | undefined;
+} & { [internal]?: string }
 
 export function accumulateValues<T>(
     obj: T,
@@ -74,4 +68,5 @@ export function accumulateDifferentialErrors<T>(
 
 export function analyzeErrors<T>(errors: ArrayError<T> | ObjectError<T> | LeafError): boolean;
 
+// FIXME: mvoe to another helper
 export function removeNull<T>(data: T | undefined | null): PurgeNull<T>;

@@ -1,12 +1,15 @@
 import { isValidEmail, isInteger } from '@togglecorp/fujs';
 import { isValidUrl } from './utils';
 
+// FIXME: move this to types
 type Maybe<T> = T | undefined | null;
 
+// FIXME: move this to utils
 function isDefined<T>(value: Maybe<T>): value is T {
     return value !== undefined && value !== null;
 }
 
+// FIXME: move this to utils
 function isDefinedString(value: Maybe<string>): value is string {
     return isDefined(value) && value.trim() !== '';
 }
@@ -110,20 +113,18 @@ export function urlCondition(value: Maybe<string>) {
         : undefined;
 }
 
-// NOTE: this is a special condition function,
-// it defines that the field should be null
-export function nullCondition() {
+export function forceNullType() {
+    return undefined;
+}
+// eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any
+export function forceEmptyArrayType(_: Maybe<any[]>) {
     return undefined;
 }
 
-// NOTE: this is a special condition function,
-// it defines that the field is non-nullable
-export function idCondition() {
+export function defaultUndefinedType() {
     return undefined;
 }
-
-// NOTE: this is a special condition function,
-// it defines that the field should be [] when it is not defined
-export function arrayCondition() {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any
+export function defaultEmptyArrayType(_: Maybe<any[]>) {
     return undefined;
 }

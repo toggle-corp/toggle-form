@@ -7,9 +7,11 @@ import {
 
 import useForm, { createSubmitHandler } from '../form';
 import type { PartialForm } from '../types';
+import { internal } from '../types';
 import type { ObjectSchema } from '../schema';
 import FormContainer from './FormContainer';
-import { requiredStringCondition, requiredCondition, nullCondition } from '../validation';
+import { getErrorObject } from '../utils';
+import { requiredStringCondition, requiredCondition, forceNullType } from '../validation';
 
 type FormType = {
     step: number;
@@ -29,11 +31,11 @@ const schema: FormSchema = {
     fields: (value): FormSchemaFields => {
         let baseSchema: FormSchemaFields = {
             step: [],
-            firstName: [nullCondition],
-            lastName: [nullCondition],
-            job: [nullCondition],
-            age: [nullCondition],
-            address: [nullCondition],
+            firstName: [forceNullType],
+            lastName: [forceNullType],
+            job: [forceNullType],
+            age: [forceNullType],
+            address: [forceNullType],
         };
         if (value?.step === 1) {
             baseSchema = {
@@ -62,30 +64,32 @@ export const Default = () => {
     const {
         pristine,
         value,
-        error,
-        onValueChange,
+        error: riskyError,
+        setFieldValue,
         validate,
-        onErrorSet,
-        onValueSet,
+        setError,
+        setValue,
     } = useForm(schema, defaultFormValues);
 
     const handleSubmit = useCallback(
         (finalValues: PartialForm<FormType>) => {
             if (finalValues.step === 1) {
-                onValueSet((val) => ({ ...val, step: 2 }));
+                setValue((val) => ({ ...val, step: 2 }));
             } else {
-                onValueSet(finalValues);
+                setValue(finalValues);
             }
-        }, [onValueSet],
+        }, [setValue],
     );
+
+    const error = getErrorObject(riskyError);
 
     return (
         <FormContainer value={value}>
             <form
-                onSubmit={createSubmitHandler(validate, onErrorSet, handleSubmit)}
+                onSubmit={createSubmitHandler(validate, setError, handleSubmit)}
             >
                 <p>
-                    {error?.$internal}
+                    {error?.[internal]}
                 </p>
                 {value.step === 1 && (
                     <>
@@ -93,15 +97,15 @@ export const Default = () => {
                             label="First Name *"
                             name="firstName"
                             value={value.firstName}
-                            onChange={onValueChange}
-                            error={error?.fields?.firstName}
+                            onChange={setFieldValue}
+                            error={error?.firstName}
                         />
                         <TextInput
                             label="Last Name"
                             name="lastName"
                             value={value.lastName}
-                            onChange={onValueChange}
-                            error={error?.fields?.lastName}
+                            onChange={setFieldValue}
+                            error={error?.lastName}
                         />
                     </>
                 )}
@@ -111,22 +115,22 @@ export const Default = () => {
                             label="Address *"
                             name="address"
                             value={value.address}
-                            onChange={onValueChange}
-                            error={error?.fields?.address}
+                            onChange={setFieldValue}
+                            error={error?.address}
                         />
                         <NumberInput
                             label="Age *"
                             name="age"
                             value={value.age}
-                            onChange={onValueChange}
-                            error={error?.fields?.age}
+                            onChange={setFieldValue}
+                            error={error?.age}
                         />
                         <TextInput
                             label="Job"
                             name="job"
                             value={value.job}
-                            onChange={onValueChange}
-                            error={error?.fields?.job}
+                            onChange={setFieldValue}
+                            error={error?.job}
                         />
                     </>
                 )}

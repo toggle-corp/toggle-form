@@ -8,8 +8,10 @@ import {
 
 import useForm, { createSubmitHandler } from '../form';
 import type { ObjectSchema } from '../schema';
+import { internal } from '../types';
 import type { PartialForm } from '../types';
 import FormContainer from './FormContainer';
+import { getErrorObject } from '../utils';
 
 type FormType = {
     firstName: string;
@@ -52,54 +54,56 @@ export const Default = () => {
     const {
         pristine,
         value,
-        error,
-        onValueChange,
+        error: riskyError,
+        setFieldValue,
         validate,
-        onErrorSet,
-        onValueSet,
+        setError,
+        setValue,
     } = useForm(schema, defaultFormValues);
 
     const handleSubmit = useCallback(
         (finalValues: PartialForm<FormType>) => {
-            onValueSet(finalValues);
-        }, [onValueSet],
+            setValue(finalValues);
+        }, [setValue],
     );
+
+    const error = getErrorObject(riskyError);
 
     return (
         <FormContainer value={value}>
             <form
-                onSubmit={createSubmitHandler(validate, onErrorSet, handleSubmit)}
+                onSubmit={createSubmitHandler(validate, setError, handleSubmit)}
             >
                 <p>
-                    {error?.$internal}
+                    {error?.[internal]}
                 </p>
                 <TextInput
                     label="First name"
                     name="firstName"
                     value={value.firstName}
-                    onChange={onValueChange}
-                    error={error?.fields?.firstName}
+                    onChange={setFieldValue}
+                    error={error?.firstName}
                 />
                 <TextInput
                     label="Last name"
                     name="lastName"
                     value={value.lastName}
-                    onChange={onValueChange}
-                    error={error?.fields?.lastName}
+                    onChange={setFieldValue}
+                    error={error?.lastName}
                 />
                 <DateInput
                     label="Birth date"
                     name="birthDate"
                     value={value.birthDate}
-                    onChange={onValueChange}
-                    error={error?.fields?.birthDate}
+                    onChange={setFieldValue}
+                    error={error?.birthDate}
                 />
                 <TextInput
                     label="Birth place"
                     name="birthPlace"
                     value={value.birthPlace}
-                    onChange={onValueChange}
-                    error={error?.fields?.birthPlace}
+                    onChange={setFieldValue}
+                    error={error?.birthPlace}
                 />
                 <Button
                     type="submit"

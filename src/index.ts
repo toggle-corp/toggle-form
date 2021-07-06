@@ -17,6 +17,8 @@ export {
     isLocalUrl,
     isValidUrl,
     isCallable,
+    getErrorObject,
+    getErrorString,
 } from './utils';
 export * from './validation';
 
@@ -30,10 +32,11 @@ export type {
     ArrayError,
     ObjectError,
 } from './schema';
+export { internal } from './types';
 export type {
     PartialForm,
     PurgeNull,
     EntriesAsList,
     EntriesAsKeyValue,
-    StateArg,
+    SetValueArg,
 } from './types';
