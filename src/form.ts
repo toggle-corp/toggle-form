@@ -19,6 +19,16 @@ import type {
 } from './types';
 import { isBaseCallable, isCallable } from './utils';
 
+interface CreateCheckPointAction {
+    type: 'CREATE_CHECKPOINT';
+}
+interface RestoreCheckPointAction {
+    type: 'RESTORE_CHECKPOINT';
+    retain: boolean,
+}
+interface ClearCheckPointAction {
+    type: 'CLEAR_CHECKPOINT';
+}
 // eslint-disable-next-line @typescript-eslint/ban-types
 interface ErrorAction<T extends object> {
     type: 'SET_ERROR';
@@ -37,10 +47,32 @@ interface PristineAction {
 // eslint-disable-next-line @typescript-eslint/ban-types
 type ValueFieldAction<T extends object> = EntriesAsKeyValue<T> & { type: 'SET_VALUE_FIELD' };
 
+// eslint-disable-next-line @typescript-eslint/ban-types
+type Actions<T extends object> = ValueFieldAction<T>
+    | ErrorAction<T>
+    | ValueAction<T>
+    | PristineAction
+    | CreateCheckPointAction
+    | RestoreCheckPointAction
+    | ClearCheckPointAction;
+
 export type ValidateFunc<T> = (accumulateOnError?: boolean) => (
     { errored: true, error: Error<T>, value: unknown }
     | { errored: false, value: T, error: undefined }
 )
+
+type State<T> = {
+    value: T,
+    error: Error<T> | undefined,
+    pristine: boolean,
+} & ({
+    checkpoint: true,
+    checkpointValue: T,
+    checkpointError: Error<T> | undefined,
+    checkpointPristine: boolean,
+} | {
+    checkpoint: false,
+});
 
 // eslint-disable-next-line @typescript-eslint/ban-types
 function useForm<T extends object>(
@@ -58,12 +90,57 @@ function useForm<T extends object>(
     setError: (errors: Error<T> | undefined) => void,
     setValue: (value: SetBaseValueArg<T>, doNotReset?: boolean) => void,
     setFieldValue: (...entries: EntriesAsList<T>) => void,
+
+    checkpoint: boolean,
+    checkpointValue: T,
+    checkpointError: Error<T> | undefined,
+    checkpointPristine: boolean,
+
+    createCheckpoint: () => void;
+    restoreCheckpoint: () => void;
+    clearCheckpoint: () => void;
 } {
     const formReducer = useCallback(
-        (
-            prevState: { value: T, error: Error<T> | undefined, pristine: boolean },
-            action: ValueFieldAction<T> | ErrorAction<T> | ValueAction<T> | PristineAction,
-        ) => {
+        (prevState: State<T>, action: Actions<T>): State<T> => {
+            if (action.type === 'CREATE_CHECKPOINT') {
+                return {
+                    ...prevState,
+                    checkpoint: true,
+                    checkpointValue: prevState.value,
+                    checkpointError: prevState.error,
+                    checkpointPristine: prevState.pristine,
+                };
+            }
+            if (action.type === 'RESTORE_CHECKPOINT') {
+                if (!prevState.checkpoint) {
+                    return prevState;
+                }
+                if (action.retain) {
+                    return {
+                        ...prevState,
+                        value: prevState.checkpointValue,
+                        error: prevState.checkpointError,
+                        pristine: prevState.checkpointPristine,
+                    };
+                }
+                return {
+                    checkpoint: false,
+                    value: prevState.checkpointValue,
+                    error: prevState.checkpointError,
+                    pristine: prevState.checkpointPristine,
+                };
+            }
+            if (action.type === 'CLEAR_CHECKPOINT') {
+                if (!prevState.checkpoint) {
+                    return prevState;
+                }
+                return {
+                    checkpoint: false,
+                    value: prevState.value,
+                    error: prevState.error,
+                    pristine: prevState.pristine,
+                };
+            }
             if (action.type === 'SET_PRISTINE') {
                 const { value } = action;
                 return {
@@ -96,6 +173,7 @@ function useForm<T extends object>(
                 }
 
                 return {
+                    ...prevState,
                     value: newVal,
                     error: undefined,
                     pristine: true,
@@ -131,6 +209,7 @@ function useForm<T extends object>(
                 );
 
                 return {
+                    ...prevState,
                     value: newValue,
                     error: newError,
                     pristine: false,
@@ -148,7 +227,39 @@ function useForm<T extends object>(
             value: initialFormValue,
             error: initialError,
             pristine: initialPristine,
+            checkpoint: false,
         },
+    );
+
+    const createCheckpoint = useCallback(
+        () => {
+            const action: CreateCheckPointAction = {
+                type: 'CREATE_CHECKPOINT',
+            };
+            dispatch(action);
+        },
+        [],
+    );
+
+    const restoreCheckpoint = useCallback(
+        (retain = false) => {
+            const action: RestoreCheckPointAction = {
+                type: 'RESTORE_CHECKPOINT',
+                retain,
+            };
+            dispatch(action);
+        },
+        [],
+    );
+
+    const clearCheckpoint = useCallback(
+        () => {
+            const action: ClearCheckPointAction = {
+                type: 'CLEAR_CHECKPOINT',
+            };
+            dispatch(action);
+        },
+        [],
     );
 
     const setPristine = useCallback(
@@ -225,6 +336,15 @@ function useForm<T extends object>(
         setFieldValue,
         setPristine,
         validate,
+
+        checkpoint: state.checkpoint,
+        checkpointValue: state.checkpoint ? state.checkpointValue : state.value,
+        checkpointError: state.checkpoint ? state.checkpointError : state.error,
+        checkpointPristine: state.checkpoint ? state.checkpointPristine : state.pristine,
+
+        createCheckpoint,
+        restoreCheckpoint,
+        clearCheckpoint,
     };
 }
 
