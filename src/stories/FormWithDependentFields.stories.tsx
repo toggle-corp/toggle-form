@@ -6,12 +6,13 @@ import {
     DateInput,
 } from '@togglecorp/toggle-ui';
 
-import useForm, { createSubmitHandler } from '../form';
+import useForm from '../form';
+import { createSubmitHandler } from '../submissionHelper';
 import type { ObjectSchema } from '../schema';
 import { internal } from '../types';
 import type { PartialForm } from '../types';
 import FormContainer from './FormContainer';
-import { getErrorObject } from '../utils';
+import { getErrorObject } from '../errorAccessHelper';
 
 type FormType = {
     firstName: string;

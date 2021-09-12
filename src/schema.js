@@ -5,7 +5,6 @@ import {
     isTruthy,
     findDifferenceInList,
     isNotDefined,
-    isDefined,
 } from '@togglecorp/fujs';
 import { internal } from './types';
 import {
@@ -15,16 +14,12 @@ import {
     defaultUndefinedType,
     defaultEmptyArrayType,
 } from './validation';
+import {
+    hasNoKeys,
+    hasNoValues,
+} from './utils';
 
 const emptyArray = [];
-
-const hasNoKeys = (obj) => (
-    isFalsy(obj) || (Object.keys(obj).length + Object.getOwnPropertySymbols(obj).length) === 0
-);
-
-const hasNoValues = (array) => (
-    isFalsy(array) || array.length <= 0 || array.every((e) => isFalsy(e))
-);
 
 export const accumulateValues = (obj, schema, settings = {}) => {
     const {
@@ -89,7 +84,6 @@ export const accumulateValues = (obj, schema, settings = {}) => {
                 values[fieldName] = value;
             }
         });
-        // FIXME: don't copy values if there is nothing to be cleared
         if (hasNoKeys(values)) {
             return nullable ? null : undefined;
         }
@@ -308,28 +302,3 @@ export const analyzeErrors = (errors) => {
         return isTruthy(subErrors);
     });
 };
-
-export function removeNull(data) {
-    if (data === null || data === undefined) {
-        return undefined;
-    }
-    if (isList(data)) {
-        return data.map(removeNull).filter(isDefined);
-    }
-    if (isObject(data)) {
-        let newData = {};
-        Object.keys(data).forEach((k) => {
-            const key = k;
-            const val = data[key];
-            const newEntry = removeNull(val);
-            if (isDefined(newEntry)) {
-                newData = {
-                    ...newData,
-                    [key]: newEntry,
-                };
-            }
-        });
-        return newData;
-    }
-    return data;
-}

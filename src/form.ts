@@ -2,8 +2,7 @@ import {
     useReducer,
     useCallback,
 } from 'react';
-import { isDefined } from '@togglecorp/fujs';
-
+import { isNotDefined } from '@togglecorp/fujs';
 import {
     accumulateDifferentialErrors,
     accumulateErrors,
@@ -14,13 +13,32 @@ import {
 import type { Schema, Error } from './schema';
 import type {
     SetValueArg,
+    SetBaseValueArg,
     EntriesAsKeyValue,
     EntriesAsList,
 } from './types';
-import { isCallable } from './utils';
+import { isBaseCallable, isCallable } from './utils';
 
-type ValidateFunc<T> = () => (
-    { errored: true, error: Error<T>, value: undefined }
+// eslint-disable-next-line @typescript-eslint/ban-types
+interface ErrorAction<T extends object> {
+    type: 'SET_ERROR';
+    error: Error<T> | undefined;
+}
+// eslint-disable-next-line @typescript-eslint/ban-types
+interface ValueAction<T extends object> {
+    type: 'SET_VALUE';
+    value: SetBaseValueArg<T>;
+    doNotReset: boolean | undefined;
+}
+interface PristineAction {
+    type: 'SET_PRISTINE';
+    value: boolean;
+}
+// eslint-disable-next-line @typescript-eslint/ban-types
+type ValueFieldAction<T extends object> = EntriesAsKeyValue<T> & { type: 'SET_VALUE_FIELD' };
+
+export type ValidateFunc<T> = (accumulateOnError?: boolean) => (
+    { errored: true, error: Error<T>, value: unknown }
     | { errored: false, value: T, error: undefined }
 )
 
@@ -38,28 +56,13 @@ function useForm<T extends object>(
 
     setPristine: (pristine: boolean) => void,
     setError: (errors: Error<T> | undefined) => void,
-    setValue: (value: SetValueArg<T>, doNotReset?: boolean) => void,
+    setValue: (value: SetBaseValueArg<T>, doNotReset?: boolean) => void,
     setFieldValue: (...entries: EntriesAsList<T>) => void,
 } {
-    interface ErrorAction {
-        type: 'SET_ERROR';
-        error: Error<T> | undefined;
-    }
-    interface ValueAction {
-        type: 'SET_VALUE';
-        value: T | ((oldVal: T) => T);
-        doNotReset: boolean | undefined;
-    }
-    interface PristineAction {
-        type: 'SET_PRISTINE';
-        value: boolean;
-    }
-    type ValueFieldAction = EntriesAsKeyValue<T> & { type: 'SET_VALUE_FIELD' };
-
     const formReducer = useCallback(
         (
             prevState: { value: T, error: Error<T> | undefined, pristine: boolean },
-            action: ValueFieldAction | ErrorAction | ValueAction | PristineAction,
+            action: ValueFieldAction<T> | ErrorAction<T> | ValueAction<T> | PristineAction,
         ) => {
             if (action.type === 'SET_PRISTINE') {
                 const { value } = action;
@@ -81,7 +84,7 @@ function useForm<T extends object>(
                     doNotReset,
                 } = action;
 
-                const newVal = isCallable(valueFromAction)
+                const newVal = isBaseCallable(valueFromAction)
                     ? valueFromAction(prevState.value)
                     : valueFromAction;
 
@@ -141,7 +144,11 @@ function useForm<T extends object>(
 
     const [state, dispatch] = useReducer(
         formReducer,
-        { value: initialFormValue, error: initialError, pristine: initialPristine },
+        {
+            value: initialFormValue,
+            error: initialError,
+            pristine: initialPristine,
+        },
     );
 
     const setPristine = useCallback(
@@ -157,7 +164,7 @@ function useForm<T extends object>(
 
     const setError = useCallback(
         (errors: Error<T> | undefined) => {
-            const action: ErrorAction = {
+            const action: ErrorAction<T> = {
                 type: 'SET_ERROR',
                 error: errors,
             };
@@ -167,8 +174,8 @@ function useForm<T extends object>(
     );
 
     const setValue = useCallback(
-        (value: SetValueArg<T>, doNotReset) => {
-            const action: ValueAction = {
+        (value: SetBaseValueArg<T>, doNotReset: boolean | undefined) => {
+            const action: ValueAction<T> = {
                 type: 'SET_VALUE',
                 value,
                 doNotReset,
@@ -181,7 +188,7 @@ function useForm<T extends object>(
     const setFieldValue = useCallback(
         (...entries: EntriesAsList<T>) => {
             const [value, key] = entries;
-            const action: ValueFieldAction = {
+            const action: ValueFieldAction<T> = {
                 type: 'SET_VALUE_FIELD',
                 key,
                 value,
@@ -192,18 +199,17 @@ function useForm<T extends object>(
     );
 
     const validate: ValidateFunc<T> = useCallback(
-        () => {
+        (accumulateOnError?: boolean) => {
             const stateErrors = accumulateErrors(state.value, schema);
             const stateErrored = analyzeErrors(stateErrors);
             if (stateErrored) {
-                return { errored: true, error: stateErrors as Error<T>, value: undefined };
+                const value = accumulateOnError
+                    ? accumulateValues(state.value, schema, { nullable: true })
+                    : undefined;
+                return { errored: true, error: stateErrors as Error<T>, value };
             }
-            const validatedValues = accumulateValues(
-                state.value,
-                schema,
-                // NOTE: server needs `null` to identify that the value is not defined
-                { nullable: true },
-            );
+            // NOTE: server needs `null` to identify that the value is not defined
+            const validatedValues = accumulateValues(state.value, schema, { nullable: true });
             return { errored: false, value: validatedValues, error: undefined };
         },
         [schema, state],
@@ -223,19 +229,22 @@ function useForm<T extends object>(
 }
 
 // eslint-disable-next-line @typescript-eslint/ban-types
-export function useFormObject<K extends string | number, T extends object | undefined>(
+export function useFormObject<K extends string | number | undefined, T extends object | undefined>(
     name: K,
     onChange: (value: SetValueArg<T>, name: K) => void,
-    // TODO: maybe make defaultValue callable
-    defaultValue: NonNullable<T>,
+    defaultValue: NonNullable<T> | (() => NonNullable<T>),
 ) {
     const setFieldValue = useCallback(
         (...entries: EntriesAsList<NonNullable<T>>) => {
             // NOTE: may need to cast callableValue here
             const [callableValue, key] = entries;
             onChange(
-                (oldValue: T): T => {
-                    const baseValue = oldValue ?? defaultValue;
+                (oldValue: T | undefined): T => {
+                    const baseValue = oldValue ?? (
+                        isCallable(defaultValue)
+                            ? defaultValue()
+                            : defaultValue
+                    );
                     return {
                         ...baseValue,
                         [key]: isCallable(callableValue)
@@ -253,24 +262,25 @@ export function useFormObject<K extends string | number, T extends object | unde
 }
 
 // eslint-disable-next-line @typescript-eslint/ban-types
-export function useFormArray<K extends string, T extends object>(
+export function useFormArray<K extends string | number | undefined, T extends object>(
     name: K,
     onChange: (
-        newValue: SetValueArg<T[] | undefined>,
+        newValue: SetValueArg<T[]>,
         inputName: K,
     ) => void,
 ) {
     const setValue = useCallback(
-        (val: SetValueArg<T>, index: number) => {
+        (val: SetValueArg<T>, index: number | undefined) => {
             onChange(
-                (oldValue: T[] | undefined): T[] | undefined => {
-                    if (!oldValue) {
-                        return undefined;
+                (oldValue: T[] | undefined): T[] => {
+                    const newVal = [...(oldValue ?? [])];
+                    if (isNotDefined(index)) {
+                        newVal.push(isCallable(val) ? val(undefined) : val);
+                    } else {
+                        newVal[index] = isCallable(val)
+                            ? val(newVal[index])
+                            : val;
                     }
-                    const newVal = [...oldValue];
-                    newVal[index] = isCallable(val)
-                        ? val(oldValue[index])
-                        : val;
                     return newVal;
                 },
                 name,
@@ -282,9 +292,9 @@ export function useFormArray<K extends string, T extends object>(
     const removeValue = useCallback(
         (index: number) => {
             onChange(
-                (oldValue: T[] | undefined): T[] | undefined => {
+                (oldValue: T[] | undefined): T[] => {
                     if (!oldValue) {
-                        return undefined;
+                        return [];
                     }
                     const newVal = [...oldValue];
                     newVal.splice(index, 1);
@@ -297,24 +307,6 @@ export function useFormArray<K extends string, T extends object>(
     );
 
     return { setValue, removeValue };
-}
-
-// FIXME: move this to helper
-export function createSubmitHandler<T>(
-    validator: () => ({ errored: boolean, error: Error<T> | undefined, value: T | undefined }),
-    setError: (errors: Error<T> | undefined) => void,
-    callback: (value: T) => void,
-) {
-    return (event: React.FormEvent<HTMLFormElement>) => {
-        event.preventDefault();
-        event.stopPropagation();
-
-        const { errored, error, value } = validator();
-        setError(error);
-        if (!errored && isDefined(value)) {
-            callback(value);
-        }
-    };
 }
 
 export default useForm;

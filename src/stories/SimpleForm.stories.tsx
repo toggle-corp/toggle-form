@@ -6,7 +6,8 @@ import {
     MultiSelectInput,
 } from '@togglecorp/toggle-ui';
 
-import useForm, { createSubmitHandler } from '../form';
+import { createSubmitHandler } from '../submissionHelper';
+import useForm from '../form';
 import type { PartialForm } from '../types';
 import { internal } from '../types';
 import type { ObjectSchema } from '../schema';
@@ -15,7 +16,7 @@ import {
     requiredStringCondition,
     requiredListCondition,
 } from '../validation';
-import { getErrorObject, getErrorString } from '../utils';
+import { getErrorObject, getErrorString } from '../errorAccessHelper';
 
 interface Option {
     key: string;

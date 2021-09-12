@@ -27,7 +27,7 @@ const PLUGINS = [
     filesize(),
     copy({
         targets: [
-            { src: 'src/schema.d.ts', dest: 'build' },
+            { src: ['src/schema.d.ts', 'src/nullHelper.d.ts'], dest: 'build' },
         ],
     }),
 ];

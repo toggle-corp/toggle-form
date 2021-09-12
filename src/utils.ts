@@ -1,47 +1,13 @@
-import { isValidUrl as isValidRemoteUrl, isNotDefined } from '@togglecorp/fujs';
-import { SetValueArg, internal } from './types';
-import type { ObjectError, ArrayError } from './schema';
+import { isFalsy, isValidUrl as isValidRemoteUrl } from '@togglecorp/fujs';
+import { SetValueArg, SetBaseValueArg, Maybe } from './types';
 
+// NOTE: used for validation
 const localhostRegex = /(?<=\/\/)localhost(?=[:/]|$)/;
-
-// FIXME: move this to another helper
-export function getErrorObject<T>(
-    value: ObjectError<T> | string | undefined,
-): ObjectError<T> | undefined
-export function getErrorObject<T>(
-    value: ArrayError<T> | string | undefined,
-): ArrayError<T> | undefined
-export function getErrorObject<T>(
-    value: ArrayError<T> | ObjectError<T> | string | undefined,
-) {
-    if (isNotDefined(value)) {
-        return undefined;
-    }
-    if (typeof value === 'string') {
-        return {
-            [internal]: value,
-        };
-    }
-    return value;
-}
-
-// FIXME: move this to another helper
-export function getErrorString<T>(
-    value: ArrayError<T> | ObjectError<T> | string | undefined,
-) {
-    if (isNotDefined(value)) {
-        return undefined;
-    }
-    if (typeof value === 'string') {
-        return value;
-    }
-    return value[internal];
-}
-
 export function isLocalUrl(url: string) {
     return localhostRegex.test(url);
 }
 
+// NOTE: used for validation
 export function isValidUrl(url: string | undefined): url is string {
     if (!url) {
         return false;
@@ -50,6 +16,36 @@ export function isValidUrl(url: string | undefined): url is string {
     return isValidRemoteUrl(sanitizedUrl);
 }
 
-export function isCallable<T>(value: SetValueArg<T>): value is (oldVal: T) => T {
+// NOTE: used for validation
+export function isDefined<T>(value: Maybe<T>): value is T {
+    return value !== undefined && value !== null;
+}
+
+// NOTE: used for validation
+export function isDefinedString(value: Maybe<string>): value is string {
+    return isDefined(value) && value.trim() !== '';
+}
+
+// eslint-disable-next-line @typescript-eslint/ban-types
+export function hasNoKeys(obj: Maybe<object>) {
+    return (
+        isFalsy(obj)
+        || (Object.keys(obj).length + Object.getOwnPropertySymbols(obj).length) === 0
+    );
+}
+
+export function hasNoValues(array: Maybe<unknown[]>) {
+    return (
+        isFalsy(array)
+        || array.length <= 0
+        || array.every((e) => isFalsy(e))
+    );
+}
+
+export function isCallable<T>(value: SetValueArg<T>): value is (oldVal: T | undefined) => T {
+    return typeof value === 'function';
+}
+
+export function isBaseCallable<T>(value: SetBaseValueArg<T>): value is (oldVal: T) => T {
     return typeof value === 'function';
 }

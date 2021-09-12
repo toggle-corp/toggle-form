@@ -1,18 +1,6 @@
 import { isValidEmail, isInteger } from '@togglecorp/fujs';
-import { isValidUrl } from './utils';
-
-// FIXME: move this to types
-type Maybe<T> = T | undefined | null;
-
-// FIXME: move this to utils
-function isDefined<T>(value: Maybe<T>): value is T {
-    return value !== undefined && value !== null;
-}
-
-// FIXME: move this to utils
-function isDefinedString(value: Maybe<string>): value is string {
-    return isDefined(value) && value.trim() !== '';
-}
+import { isValidUrl, isDefined, isDefinedString } from './utils';
+import { Maybe } from './types';
 
 export function requiredCondition(value: unknown) {
     return !isDefined(value)
