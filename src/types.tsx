@@ -2,6 +2,8 @@ export const internal = Symbol('Internal Error');
 
 type Intersects<A, B> = A extends B ? true : never;
 
+export type Maybe<T> = T | undefined | null;
+
 // eslint-disable-next-line @typescript-eslint/ban-types
 export type PartialForm<T, J extends string = 'uuid'> = T extends object ? (
     T extends (infer K)[] ? (
@@ -28,7 +30,9 @@ export type PurgeNull<T> = (
         )
 )
 
-export type SetValueArg<T> = T | ((value: T) => T);
+export type SetValueArg<T> = T | ((value: T | undefined) => T);
+// NOTE: no undefined because we know the base value is always defined
+export type SetBaseValueArg<T> = T | ((value: T) => T);
 
 export type EntriesAsList<T> = {
     [K in keyof T]-?: [SetValueArg<T[K]>, K, ...unknown[]];

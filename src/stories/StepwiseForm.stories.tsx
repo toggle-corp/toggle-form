@@ -5,12 +5,13 @@ import {
     NumberInput,
 } from '@togglecorp/toggle-ui';
 
-import useForm, { createSubmitHandler } from '../form';
+import { createSubmitHandler } from '../submissionHelper';
+import useForm from '../form';
 import type { PartialForm } from '../types';
 import { internal } from '../types';
 import type { ObjectSchema } from '../schema';
 import FormContainer from './FormContainer';
-import { getErrorObject } from '../utils';
+import { getErrorObject } from '../errorAccessHelper';
 import { requiredStringCondition, requiredCondition, forceNullType } from '../validation';
 
 type FormType = {

@@ -1,13 +1,9 @@
 export {
-    createSubmitHandler,
-
     useFormObject,
     useFormArray,
     default as useForm,
 } from './form';
 export {
-    removeNull,
-
     accumulateValues,
     accumulateErrors,
     accumulateDifferentialErrors,
@@ -17,8 +13,6 @@ export {
     isLocalUrl,
     isValidUrl,
     isCallable,
-    getErrorObject,
-    getErrorString,
 } from './utils';
 export * from './validation';
 
@@ -32,11 +26,30 @@ export type {
     ArrayError,
     ObjectError,
 } from './schema';
+// FIXME: rename to nonFieldErrorSymbol?
 export { internal } from './types';
 export type {
     PartialForm,
+    // FIXME: rename to NoNull?
     PurgeNull,
+    // FIXME: rename
     EntriesAsList,
+    // FIXME: rename
     EntriesAsKeyValue,
+    // FIXME: rename
     SetValueArg,
+    // FIXME: rename
+    SetBaseValueArg,
 } from './types';
+export {
+    removeNull,
+} from './nullHelper';
+export {
+    // FIXME: rename to getErrorAsObject
+    getErrorObject,
+    // FIXME: rename to getErrorAsString
+    getErrorString,
+} from './errorAccessHelper';
+export {
+    createSubmitHandler,
+} from './submissionHelper';

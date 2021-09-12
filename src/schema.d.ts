@@ -1,4 +1,4 @@
-import { PurgeNull, internal } from './types';
+import { internal } from './types';
 
 export type Schema<T, V=T> = (
     Exclude<T, undefined> extends unknown[]
@@ -67,6 +67,3 @@ export function accumulateDifferentialErrors<T>(
 ): Error<T> | undefined;
 
 export function analyzeErrors<T>(errors: ArrayError<T> | ObjectError<T> | LeafError): boolean;
-
-// FIXME: mvoe to another helper
-export function removeNull<T>(data: T | undefined | null): PurgeNull<T>;

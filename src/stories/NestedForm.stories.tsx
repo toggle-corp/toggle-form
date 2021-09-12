@@ -7,7 +7,8 @@ import {
 } from '@togglecorp/toggle-ui';
 import { randomString } from '@togglecorp/fujs';
 
-import useForm, { createSubmitHandler, useFormArray, useFormObject } from '../form';
+import { createSubmitHandler } from '../submissionHelper';
+import useForm, { useFormArray, useFormObject } from '../form';
 import type { PartialForm as RawPartialForm, SetValueArg } from '../types';
 import type { Error, ObjectSchema, ArraySchema } from '../schema';
 import FormContainer, { Row } from './FormContainer';
@@ -16,7 +17,7 @@ import {
     requiredCondition,
     greaterThanCondition,
 } from '../validation';
-import { getErrorObject } from '../utils';
+import { getErrorObject } from '../errorAccessHelper';
 import { internal } from '../types';
 
 type PartialForm<T> = RawPartialForm<T, 'clientId'>;
