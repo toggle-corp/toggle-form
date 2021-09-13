@@ -2,11 +2,11 @@ import { internal } from './types';
 
 export type Schema<T, V=T> = (
     Exclude<T, undefined> extends unknown[]
-        ? ArraySchema<Exclude<T, undefined>[number]> | LiteralSchema<T, V>
+        ? ArraySchema<Exclude<T, undefined>[number], V> | LiteralSchema<T, V>
         : (
             // eslint-disable-next-line @typescript-eslint/ban-types
             Exclude<T, undefined> extends object
-                ? ObjectSchema<Exclude<T, undefined>> | LiteralSchema<T, V>
+                ? ObjectSchema<Exclude<T, undefined>, V> | LiteralSchema<T, V>
                 : LiteralSchema<T, V>
           )
 );
