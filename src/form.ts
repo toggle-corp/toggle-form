@@ -13,11 +13,12 @@ import {
 import type { Schema, Error } from './schema';
 import type {
     SetValueArg,
+    SetErrorArg,
     SetBaseValueArg,
     EntriesAsKeyValue,
     EntriesAsList,
 } from './types';
-import { isBaseCallable, isCallable } from './utils';
+import { isBaseCallable, isCallable, isErrorCallable } from './utils';
 
 interface CreateRestorePointAction {
     type: 'CREATE_RESTORE_POINT';
@@ -32,7 +33,7 @@ interface ClearRestorePointAction {
 // eslint-disable-next-line @typescript-eslint/ban-types
 interface ErrorAction<T extends object> {
     type: 'SET_ERROR';
-    error: Error<T> | undefined;
+    error: SetErrorArg<Error<T>> | undefined;
 }
 // eslint-disable-next-line @typescript-eslint/ban-types
 interface ValueAction<T extends object> {
@@ -87,7 +88,7 @@ function useForm<T extends object>(
     validate: ValidateFunc<T>,
 
     setPristine: (pristine: boolean) => void,
-    setError: (errors: Error<T> | undefined) => void,
+    setError: (errors: SetErrorArg<Error<T>> | undefined) => void,
     setValue: (value: SetBaseValueArg<T>, doNotReset?: boolean) => void,
     setFieldValue: (...entries: EntriesAsList<T>) => void,
 
@@ -149,10 +150,15 @@ function useForm<T extends object>(
                 };
             }
             if (action.type === 'SET_ERROR') {
-                const { error } = action;
+                const { error: errorFromAction } = action;
+
+                const newErr = isErrorCallable(errorFromAction)
+                    ? errorFromAction(prevState.error)
+                    : errorFromAction;
+
                 return {
                     ...prevState,
-                    error,
+                    error: newErr,
                 };
             }
             if (action.type === 'SET_VALUE') {
@@ -274,7 +280,7 @@ function useForm<T extends object>(
     );
 
     const setError = useCallback(
-        (errors: Error<T> | undefined) => {
+        (errors: SetErrorArg<Error<T>> | undefined) => {
             const action: ErrorAction<T> = {
                 type: 'SET_ERROR',
                 error: errors,

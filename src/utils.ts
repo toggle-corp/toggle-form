@@ -1,5 +1,5 @@
 import { isFalsy, isValidUrl as isValidRemoteUrl } from '@togglecorp/fujs';
-import { SetValueArg, SetBaseValueArg, Maybe } from './types';
+import { SetErrorArg, SetValueArg, SetBaseValueArg, Maybe } from './types';
 
 // NOTE: used for validation
 const localhostRegex = /(?<=\/\/)localhost(?=[:/]|$)/;
@@ -47,5 +47,10 @@ export function isCallable<T>(value: SetValueArg<T>): value is (oldVal: T | unde
 }
 
 export function isBaseCallable<T>(value: SetBaseValueArg<T>): value is (oldVal: T) => T {
+    return typeof value === 'function';
+}
+
+// eslint-disable-next-line max-len
+export function isErrorCallable<T>(value: SetErrorArg<T>): value is (oldVal: T | undefined) => (T | undefined) {
     return typeof value === 'function';
 }

@@ -34,6 +34,8 @@ export type SetValueArg<T> = T | ((value: T | undefined) => T);
 // NOTE: no undefined because we know the base value is always defined
 export type SetBaseValueArg<T> = T | ((value: T) => T);
 
+export type SetErrorArg<T> = T | undefined | ((value: T | undefined) => (T | undefined));
+
 export type EntriesAsList<T> = {
     [K in keyof T]-?: [SetValueArg<T[K]>, K, ...unknown[]];
 }[keyof T];
