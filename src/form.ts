@@ -19,15 +19,15 @@ import type {
 } from './types';
 import { isBaseCallable, isCallable } from './utils';
 
-interface CreateCheckPointAction {
-    type: 'CREATE_CHECKPOINT';
+interface CreateRestorePointAction {
+    type: 'CREATE_RESTORE_POINT';
 }
-interface RestoreCheckPointAction {
-    type: 'RESTORE_CHECKPOINT';
+interface RestoreRestorePointAction {
+    type: 'RESTORE_RESTORE_POINT';
     retain: boolean,
 }
-interface ClearCheckPointAction {
-    type: 'CLEAR_CHECKPOINT';
+interface ClearRestorePointAction {
+    type: 'CLEAR_RESTORE_POINT';
 }
 // eslint-disable-next-line @typescript-eslint/ban-types
 interface ErrorAction<T extends object> {
@@ -52,9 +52,9 @@ type Actions<T extends object> = ValueFieldAction<T>
     | ErrorAction<T>
     | ValueAction<T>
     | PristineAction
-    | CreateCheckPointAction
-    | RestoreCheckPointAction
-    | ClearCheckPointAction;
+    | CreateRestorePointAction
+    | RestoreRestorePointAction
+    | ClearRestorePointAction;
 
 export type ValidateFunc<T> = (accumulateOnError?: boolean) => (
     { errored: true, error: Error<T>, value: unknown }
@@ -66,12 +66,12 @@ type State<T> = {
     error: Error<T> | undefined,
     pristine: boolean,
 } & ({
-    checkpoint: true,
-    checkpointValue: T,
-    checkpointError: Error<T> | undefined,
-    checkpointPristine: boolean,
+    hasRestorePoint: true,
+    restorepointValue: T,
+    restorepointError: Error<T> | undefined,
+    restorepointPristine: boolean,
 } | {
-    checkpoint: false,
+    hasRestorePoint: false,
 });
 
 // eslint-disable-next-line @typescript-eslint/ban-types
@@ -91,51 +91,51 @@ function useForm<T extends object>(
     setValue: (value: SetBaseValueArg<T>, doNotReset?: boolean) => void,
     setFieldValue: (...entries: EntriesAsList<T>) => void,
 
-    checkpoint: boolean,
-    checkpointValue: T,
-    checkpointError: Error<T> | undefined,
-    checkpointPristine: boolean,
+    hasRestorePoint: boolean,
+    restorepointValue: T,
+    restorepointError: Error<T> | undefined,
+    restorepointPristine: boolean,
 
-    createCheckpoint: () => void;
-    restoreCheckpoint: () => void;
-    clearCheckpoint: () => void;
+    createRestorePoint: () => void;
+    restore: () => void;
+    clearRestorePoint: () => void;
 } {
     const formReducer = useCallback(
         (prevState: State<T>, action: Actions<T>): State<T> => {
-            if (action.type === 'CREATE_CHECKPOINT') {
+            if (action.type === 'CREATE_RESTORE_POINT') {
                 return {
                     ...prevState,
-                    checkpoint: true,
-                    checkpointValue: prevState.value,
-                    checkpointError: prevState.error,
-                    checkpointPristine: prevState.pristine,
+                    hasRestorePoint: true,
+                    restorepointValue: prevState.value,
+                    restorepointError: prevState.error,
+                    restorepointPristine: prevState.pristine,
                 };
             }
-            if (action.type === 'RESTORE_CHECKPOINT') {
-                if (!prevState.checkpoint) {
+            if (action.type === 'RESTORE_RESTORE_POINT') {
+                if (!prevState.hasRestorePoint) {
                     return prevState;
                 }
                 if (action.retain) {
                     return {
                         ...prevState,
-                        value: prevState.checkpointValue,
-                        error: prevState.checkpointError,
-                        pristine: prevState.checkpointPristine,
+                        value: prevState.restorepointValue,
+                        error: prevState.restorepointError,
+                        pristine: prevState.restorepointPristine,
                     };
                 }
                 return {
-                    checkpoint: false,
-                    value: prevState.checkpointValue,
-                    error: prevState.checkpointError,
-                    pristine: prevState.checkpointPristine,
+                    hasRestorePoint: false,
+                    value: prevState.restorepointValue,
+                    error: prevState.restorepointError,
+                    pristine: prevState.restorepointPristine,
                 };
             }
-            if (action.type === 'CLEAR_CHECKPOINT') {
-                if (!prevState.checkpoint) {
+            if (action.type === 'CLEAR_RESTORE_POINT') {
+                if (!prevState.hasRestorePoint) {
                     return prevState;
                 }
                 return {
-                    checkpoint: false,
+                    hasRestorePoint: false,
                     value: prevState.value,
                     error: prevState.error,
                     pristine: prevState.pristine,
@@ -227,24 +227,24 @@ function useForm<T extends object>(
             value: initialFormValue,
             error: initialError,
             pristine: initialPristine,
-            checkpoint: false,
+            hasRestorePoint: false,
         },
     );
 
-    const createCheckpoint = useCallback(
+    const createRestorePoint = useCallback(
         () => {
-            const action: CreateCheckPointAction = {
-                type: 'CREATE_CHECKPOINT',
+            const action: CreateRestorePointAction = {
+                type: 'CREATE_RESTORE_POINT',
             };
             dispatch(action);
         },
         [],
     );
 
-    const restoreCheckpoint = useCallback(
+    const restore = useCallback(
         (retain = false) => {
-            const action: RestoreCheckPointAction = {
-                type: 'RESTORE_CHECKPOINT',
+            const action: RestoreRestorePointAction = {
+                type: 'RESTORE_RESTORE_POINT',
                 retain,
             };
             dispatch(action);
@@ -252,10 +252,10 @@ function useForm<T extends object>(
         [],
     );
 
-    const clearCheckpoint = useCallback(
+    const clearRestorePoint = useCallback(
         () => {
-            const action: ClearCheckPointAction = {
-                type: 'CLEAR_CHECKPOINT',
+            const action: ClearRestorePointAction = {
+                type: 'CLEAR_RESTORE_POINT',
             };
             dispatch(action);
         },
@@ -337,14 +337,14 @@ function useForm<T extends object>(
         setPristine,
         validate,
 
-        checkpoint: state.checkpoint,
-        checkpointValue: state.checkpoint ? state.checkpointValue : state.value,
-        checkpointError: state.checkpoint ? state.checkpointError : state.error,
-        checkpointPristine: state.checkpoint ? state.checkpointPristine : state.pristine,
+        hasRestorePoint: state.hasRestorePoint,
+        restorepointValue: state.hasRestorePoint ? state.restorepointValue : state.value,
+        restorepointError: state.hasRestorePoint ? state.restorepointError : state.error,
+        restorepointPristine: state.hasRestorePoint ? state.restorepointPristine : state.pristine,
 
-        createCheckpoint,
-        restoreCheckpoint,
-        clearCheckpoint,
+        createRestorePoint,
+        restore,
+        clearRestorePoint,
     };
 }
 

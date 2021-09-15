@@ -34,26 +34,28 @@ type FormType = {
         title?: string;
     }[];
 };
-type FormSchema = ObjectSchema<PartialForm<FormType>>;
+type BaseFormType = PartialForm<FormType>;
+
+type FormSchema = ObjectSchema<BaseFormType, BaseFormType>;
 type FormSchemaFields = ReturnType<FormSchema['fields']>;
 type MetaType = NonNullable<FormType['meta']>;
-type MetaSchema = ObjectSchema<PartialForm<MetaType>>;
+type MetaSchema = ObjectSchema<PartialForm<MetaType>, BaseFormType>;
 type MetaSchemaFields = ReturnType<MetaSchema['fields']>;
 type CollectionType = NonNullable<NonNullable<FormType['collections']>>[number];
-type CollectionSchema = ObjectSchema<PartialForm<CollectionType>>;
+type CollectionSchema = ObjectSchema<PartialForm<CollectionType>, BaseFormType>;
 type CollectionSchemaFields = ReturnType<CollectionSchema['fields']>;
-type CollectionsSchema = ArraySchema<PartialForm<CollectionType>>;
+type CollectionsSchema = ArraySchema<PartialForm<CollectionType>, BaseFormType>;
 type CollectionsSchemaMember = ReturnType<CollectionsSchema['member']>;
 
 const schema: FormSchema = {
     fields: (): FormSchemaFields => ({
         name: [requiredStringCondition],
-        meta: ({
+        meta: {
             fields: (): MetaSchemaFields => ({
                 age: [requiredCondition, greaterThanCondition(12)],
                 job: [],
             }),
-        }),
+        },
         collections: {
             keySelector: (col) => col.clientId,
             member: (): CollectionsSchemaMember => ({
