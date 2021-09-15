@@ -66,6 +66,26 @@ export const Default = () => {
         clearRestorePoint,
     } = useForm(schemaWithValidation, defaultFormValues);
 
+    const handleErrorToggle = useCallback(
+        () => {
+            setError((oldError) => {
+                if (typeof oldError === 'string') {
+                    return oldError ? undefined : 'I like errors';
+                }
+
+                if (oldError) {
+                    return {
+                        ...oldError,
+                        [internal]: oldError[internal] ? undefined : 'I like errors',
+                    };
+                }
+
+                return 'I like errors';
+            });
+        },
+        [setError],
+    );
+
     const handleSubmit = useCallback(
         (finalValues: PartialForm<FormType>) => {
             setValue(finalValues);
@@ -114,6 +134,12 @@ export const Default = () => {
                         disabled={pristine}
                     >
                         Submit
+                    </Button>
+                    <Button
+                        name={undefined}
+                        onClick={handleErrorToggle}
+                    >
+                        Toggle error
                     </Button>
                     {!hasRestorePoint && (
                         <Button
