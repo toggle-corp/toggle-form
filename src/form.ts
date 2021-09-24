@@ -172,9 +172,21 @@ function useForm<T extends object>(
                     : valueFromAction;
 
                 if (doNotReset) {
+                    const oldValue = prevState.value;
+                    const oldError = prevState.error;
+
+                    const newError = accumulateDifferentialErrors(
+                        oldValue,
+                        newVal,
+                        oldError,
+                        schema,
+                    );
+
                     return {
                         ...prevState,
                         value: newVal,
+                        error: newError,
+                        pristine: false,
                     };
                 }
 
