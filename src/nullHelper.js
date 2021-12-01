@@ -5,12 +5,17 @@ import {
 } from '@togglecorp/fujs';
 
 // eslint-disable-next-line import/prefer-default-export
-export function removeNull(data, ignoreKeys = ['__typename']) {
+export function removeNull(
+    data,
+    ignoreKeys = ['__typename'],
+) {
     if (data === null || data === undefined) {
         return undefined;
     }
     if (isList(data)) {
-        return data.map(removeNull).filter(isDefined);
+        return data
+            .map((item) => removeNull(item, ignoreKeys))
+            .filter(isDefined);
     }
     if (isObject(data)) {
         let newData = {};
@@ -21,7 +26,7 @@ export function removeNull(data, ignoreKeys = ['__typename']) {
             }
 
             const val = data[key];
-            const newEntry = removeNull(val);
+            const newEntry = removeNull(val, ignoreKeys);
             if (isDefined(newEntry)) {
                 newData = {
                     ...newData,
