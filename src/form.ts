@@ -167,20 +167,36 @@ function useForm<T extends object>(
                     doNotReset,
                 } = action;
 
-                const newVal = isBaseCallable(valueFromAction)
+                const newValue = isBaseCallable(valueFromAction)
                     ? valueFromAction(prevState.value)
                     : valueFromAction;
 
                 if (doNotReset) {
+                    const oldError = prevState.error;
+                    const oldValue = prevState.value;
+
+                    if (oldValue === newValue) {
+                        return prevState;
+                    }
+
+                    const newError = accumulateDifferentialErrors(
+                        oldValue,
+                        newValue,
+                        oldError,
+                        schema,
+                    );
+
                     return {
                         ...prevState,
-                        value: newVal,
+                        value: newValue,
+                        error: newError,
+                        pristine: false,
                     };
                 }
 
                 return {
                     ...prevState,
-                    value: newVal,
+                    value: newValue,
                     error: undefined,
                     pristine: true,
                 };
