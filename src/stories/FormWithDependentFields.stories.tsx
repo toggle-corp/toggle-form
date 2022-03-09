@@ -21,7 +21,9 @@ type FormType = {
     birthPlace: string;
 };
 
-type FormSchema = ObjectSchema<PartialForm<FormType>>
+type PartForm = PartialForm<FormType>;
+
+type FormSchema = ObjectSchema<PartForm>
 type FormSchemaFields = ReturnType<FormSchema['fields']>;
 
 function requiredWithBirthDateCondition(
@@ -60,7 +62,7 @@ export const Default = () => {
         validate,
         setError,
         setValue,
-    } = useForm(schema, defaultFormValues);
+    } = useForm(schema, { value: defaultFormValues });
 
     const handleSubmit = useCallback(
         (finalValues: PartialForm<FormType>) => {

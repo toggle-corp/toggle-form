@@ -104,6 +104,11 @@ export function urlCondition(value: Maybe<string>) {
 export function forceNullType() {
     return undefined;
 }
+
+export function forceUndefinedType() {
+    return undefined;
+}
+
 // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any
 export function forceEmptyArrayType(_: Maybe<any[]>) {
     return undefined;

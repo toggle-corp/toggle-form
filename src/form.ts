@@ -76,11 +76,72 @@ type State<T> = {
 });
 
 // eslint-disable-next-line @typescript-eslint/ban-types
-function useForm<T extends object>(
-    schema: Schema<T>,
-    initialFormValue: T,
-    initialPristine = true,
-    initialError?: Error<T>,
+function useForm<T extends object, C = undefined>(
+    schema: Schema<T, T, C>,
+    initialState: {
+        value: T,
+        error?: Error<T>,
+        pristine?: boolean,
+    },
+    context?: undefined,
+): {
+    value: T,
+    error: Error<T> | undefined,
+    pristine: boolean,
+    validate: ValidateFunc<T>,
+
+    setPristine: (pristine: boolean) => void,
+    setError: (errors: SetErrorArg<Error<T>> | undefined) => void,
+    setValue: (value: SetBaseValueArg<T>, doNotReset?: boolean) => void,
+    setFieldValue: (...entries: EntriesAsList<T>) => void,
+
+    hasRestorePoint: boolean,
+    restorepointValue: T,
+    restorepointError: Error<T> | undefined,
+    restorepointPristine: boolean,
+
+    createRestorePoint: () => void;
+    restore: () => void;
+    clearRestorePoint: () => void;
+};
+// eslint-disable-next-line @typescript-eslint/ban-types
+function useForm<T extends object, C>(
+    schema: Schema<T, T, C>,
+    initialState: {
+        value: T,
+        error?: Error<T>,
+        pristine?: boolean,
+    },
+    context: C,
+): {
+    value: T,
+    error: Error<T> | undefined,
+    pristine: boolean,
+    validate: ValidateFunc<T>,
+
+    setPristine: (pristine: boolean) => void,
+    setError: (errors: SetErrorArg<Error<T>> | undefined) => void,
+    setValue: (value: SetBaseValueArg<T>, doNotReset?: boolean) => void,
+    setFieldValue: (...entries: EntriesAsList<T>) => void,
+
+    hasRestorePoint: boolean,
+    restorepointValue: T,
+    restorepointError: Error<T> | undefined,
+    restorepointPristine: boolean,
+
+    createRestorePoint: () => void;
+    restore: () => void;
+    clearRestorePoint: () => void;
+};
+// eslint-disable-next-line @typescript-eslint/ban-types
+function useForm<T extends object, C>(
+    schema: Schema<T, T, C>,
+    initialState: {
+        value: T,
+        error?: Error<T>,
+        pristine?: boolean,
+    },
+    context: C,
 ): {
     value: T,
     error: Error<T> | undefined,
@@ -101,6 +162,11 @@ function useForm<T extends object>(
     restore: () => void;
     clearRestorePoint: () => void;
 } {
+    const {
+        value: initialFormValue,
+        error: initialError,
+        pristine: initialPristine = true,
+    } = initialState;
     const formReducer = useCallback(
         (prevState: State<T>, action: Actions<T>): State<T> => {
             if (action.type === 'CREATE_RESTORE_POINT') {
@@ -179,11 +245,14 @@ function useForm<T extends object>(
                         return prevState;
                     }
 
-                    const newError = accumulateDifferentialErrors(
+                    const newError = accumulateDifferentialErrors<T, T, C>(
                         oldValue,
                         newValue,
                         oldError,
                         schema,
+                        newValue,
+                        false,
+                        context,
                     );
 
                     return {
@@ -228,6 +297,9 @@ function useForm<T extends object>(
                     newValue,
                     oldError,
                     schema,
+                    newValue,
+                    false,
+                    context,
                 );
 
                 return {
@@ -240,7 +312,7 @@ function useForm<T extends object>(
             console.error('Action is not supported');
             return prevState;
         },
-        [schema],
+        [schema, context],
     );
 
     const [state, dispatch] = useReducer(
@@ -333,7 +405,7 @@ function useForm<T extends object>(
 
     const validate: ValidateFunc<T> = useCallback(
         (accumulateOnError?: boolean) => {
-            const stateErrors = accumulateErrors(state.value, schema);
+            const stateErrors = accumulateErrors(state.value, schema, state.value, context);
             const stateErrored = analyzeErrors(stateErrors);
             if (stateErrored) {
                 const value = accumulateOnError
@@ -345,7 +417,7 @@ function useForm<T extends object>(
             const validatedValues = accumulateValues(state.value, schema, { nullable: true });
             return { errored: false, value: validatedValues, error: undefined };
         },
-        [schema, state],
+        [schema, state, context],
     );
 
     return {

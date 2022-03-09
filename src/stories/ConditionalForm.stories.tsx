@@ -24,7 +24,9 @@ type FormType = {
     address?: string;
 };
 
-type FormSchema = ObjectSchema<PartialForm<FormType>>
+type PartForm = PartialForm<FormType>;
+
+type FormSchema = ObjectSchema<PartForm>;
 type FormSchemaFields = ReturnType<FormSchema['fields']>;
 
 const schema: FormSchema = {
@@ -60,7 +62,7 @@ export const Default = () => {
         validate,
         setError,
         setValue,
-    } = useForm(schema, defaultFormValues);
+    } = useForm(schema, { value: defaultFormValues });
 
     const handleSubmit = useCallback(
         (finalValues: PartialForm<FormType>) => {
