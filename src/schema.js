@@ -102,7 +102,12 @@ export const accumulateValues = (
     return undefined;
 };
 
-export const accumulateErrors = (obj, schema, baseValue = obj, context = null) => {
+export const accumulateErrors = (
+    obj,
+    schema,
+    baseValue = obj,
+    context = undefined,
+) => {
     const {
         member,
         fields,
@@ -178,7 +183,7 @@ export const accumulateDifferentialErrors = (
     // so, forced is used when the dependencies have changed
     // and the new error is calculated
     forced = false,
-    context = null,
+    context = undefined,
 ) => {
     if (!forced && oldObj === newObj) {
         return oldError;

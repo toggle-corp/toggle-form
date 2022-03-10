@@ -50,28 +50,31 @@ export type ObjectError<T> = {
     [K in keyof T]?: Error<T[K]> | undefined;
 } & { [internal]?: string }
 
-export function accumulateValues<T>(
+export function accumulateValues<T, C>(
     obj: T,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    schema: Schema<T, T, any>,
+    schema: Schema<T, T, C>,
     settings?: { nullable: boolean },
+    // FIXME: accumulateValues also requires context
 ): T;
 
-export function accumulateErrors<T, V, C>(
+export function accumulateErrors<T, C>(
     obj: T,
-    schema: Schema<T, V, C>,
-    baseValue: V,
+    schema: Schema<T, T, C>,
+    baseValue: T,
     context?: C,
 ): Error<T> | undefined;
 
-export function accumulateDifferentialErrors<T, V, C>(
+export function accumulateDifferentialErrors<T, C>(
     oldObj: T,
     newObj: T,
     oldError: Error<T> | undefined,
-    schema: Schema<T, V, C>,
-    baseValue: V,
+    schema: Schema<T, T, C>,
+    baseValue: T,
+    // FIXME: move this below context
     force = false,
     context: C,
 ): Error<T> | undefined;
 
-export function analyzeErrors<T>(errors: ArrayError<T> | ObjectError<T> | LeafError): boolean;
+export function analyzeErrors<T>(
+    errors: ArrayError<T> | ObjectError<T> | LeafError
+): boolean;

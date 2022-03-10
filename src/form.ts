@@ -68,9 +68,9 @@ type State<T> = {
     pristine: boolean,
 } & ({
     hasRestorePoint: true,
-    restorepointValue: T,
-    restorepointError: Error<T> | undefined,
-    restorepointPristine: boolean,
+    restorePointValue: T,
+    restorePointError: Error<T> | undefined,
+    restorePointPristine: boolean,
 } | {
     hasRestorePoint: false,
 });
@@ -96,9 +96,9 @@ function useForm<T extends object, C = undefined>(
     setFieldValue: (...entries: EntriesAsList<T>) => void,
 
     hasRestorePoint: boolean,
-    restorepointValue: T,
-    restorepointError: Error<T> | undefined,
-    restorepointPristine: boolean,
+    restorePointValue: T,
+    restorePointError: Error<T> | undefined,
+    restorePointPristine: boolean,
 
     createRestorePoint: () => void;
     restore: () => void;
@@ -125,9 +125,9 @@ function useForm<T extends object, C>(
     setFieldValue: (...entries: EntriesAsList<T>) => void,
 
     hasRestorePoint: boolean,
-    restorepointValue: T,
-    restorepointError: Error<T> | undefined,
-    restorepointPristine: boolean,
+    restorePointValue: T,
+    restorePointError: Error<T> | undefined,
+    restorePointPristine: boolean,
 
     createRestorePoint: () => void;
     restore: () => void;
@@ -154,9 +154,9 @@ function useForm<T extends object, C>(
     setFieldValue: (...entries: EntriesAsList<T>) => void,
 
     hasRestorePoint: boolean,
-    restorepointValue: T,
-    restorepointError: Error<T> | undefined,
-    restorepointPristine: boolean,
+    restorePointValue: T,
+    restorePointError: Error<T> | undefined,
+    restorePointPristine: boolean,
 
     createRestorePoint: () => void;
     restore: () => void;
@@ -173,9 +173,9 @@ function useForm<T extends object, C>(
                 return {
                     ...prevState,
                     hasRestorePoint: true,
-                    restorepointValue: prevState.value,
-                    restorepointError: prevState.error,
-                    restorepointPristine: prevState.pristine,
+                    restorePointValue: prevState.value,
+                    restorePointError: prevState.error,
+                    restorePointPristine: prevState.pristine,
                 };
             }
             if (action.type === 'RESTORE_RESTORE_POINT') {
@@ -185,16 +185,16 @@ function useForm<T extends object, C>(
                 if (action.retain) {
                     return {
                         ...prevState,
-                        value: prevState.restorepointValue,
-                        error: prevState.restorepointError,
-                        pristine: prevState.restorepointPristine,
+                        value: prevState.restorePointValue,
+                        error: prevState.restorePointError,
+                        pristine: prevState.restorePointPristine,
                     };
                 }
                 return {
                     hasRestorePoint: false,
-                    value: prevState.restorepointValue,
-                    error: prevState.restorepointError,
-                    pristine: prevState.restorepointPristine,
+                    value: prevState.restorePointValue,
+                    error: prevState.restorePointError,
+                    pristine: prevState.restorePointPristine,
                 };
             }
             if (action.type === 'CLEAR_RESTORE_POINT') {
@@ -245,7 +245,7 @@ function useForm<T extends object, C>(
                         return prevState;
                     }
 
-                    const newError = accumulateDifferentialErrors<T, T, C>(
+                    const newError = accumulateDifferentialErrors(
                         oldValue,
                         newValue,
                         oldError,
@@ -432,9 +432,9 @@ function useForm<T extends object, C>(
         validate,
 
         hasRestorePoint: state.hasRestorePoint,
-        restorepointValue: state.hasRestorePoint ? state.restorepointValue : state.value,
-        restorepointError: state.hasRestorePoint ? state.restorepointError : state.error,
-        restorepointPristine: state.hasRestorePoint ? state.restorepointPristine : state.pristine,
+        restorePointValue: state.hasRestorePoint ? state.restorePointValue : state.value,
+        restorePointError: state.hasRestorePoint ? state.restorePointError : state.error,
+        restorePointPristine: state.hasRestorePoint ? state.restorePointPristine : state.pristine,
 
         createRestorePoint,
         restore,
