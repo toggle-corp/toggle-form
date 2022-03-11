@@ -43,6 +43,7 @@ export function lengthGreaterThanCondition(x: number) {
             : undefined
     );
 }
+
 export function lengthSmallerThanCondition(x: number) {
     // NOTE: isDefinedString is not really required here
     return (value: Maybe<string | unknown[]>) => (

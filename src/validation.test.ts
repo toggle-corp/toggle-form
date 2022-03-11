@@ -4,6 +4,15 @@ import {
     requiredStringCondition,
     blacklistCondition,
     whitelistCondition,
+    lengthGreaterThanCondition,
+    lengthSmallerThanCondition,
+    greaterThanCondition,
+    smallerThanCondition,
+    greaterThanOrEqualToCondition,
+    lessThanOrEqualToCondition,
+    integerCondition,
+    emailCondition,
+    urlCondition,
 } from './validation';
 
 test('test required condition', () => {
@@ -43,4 +52,85 @@ test('test blacklist condition', () => {
     expect(blacklistConditionInstance('ram')).toBe('The field cannot be ram');
     expect(blacklistConditionInstance('laxman')).toBe('The field cannot be laxman');
     expect(blacklistConditionInstance('rawan')).toBe(undefined);
+});
+
+test('test length greater than condition', () => {
+    const lengthGreaterThanConditionInstance = lengthGreaterThanCondition(4);
+    expect(lengthGreaterThanConditionInstance(null)).toBe(undefined);
+    expect(lengthGreaterThanConditionInstance(undefined)).toBe(undefined);
+    expect(lengthGreaterThanConditionInstance('')).toBe('Length must be greater than 4');
+    expect(lengthGreaterThanConditionInstance('Dimb')).toBe('Length must be greater than 4');
+    expect(lengthGreaterThanConditionInstance('Dimbrew')).toBe(undefined);
+});
+
+test('test length smaller than condition', () => {
+    const lengthSmallerThanConditionInstance = lengthSmallerThanCondition(4);
+    expect(lengthSmallerThanConditionInstance(null)).toBe(undefined);
+    expect(lengthSmallerThanConditionInstance(undefined)).toBe(undefined);
+    expect(lengthSmallerThanConditionInstance('')).toBe(undefined);
+    expect(lengthSmallerThanConditionInstance('Coffee')).toBe('Length must be smaller than 4');
+    expect(lengthSmallerThanConditionInstance('Dimb')).toBe('Length must be smaller than 4');
+});
+
+test('test greater than condition', () => {
+    const greaterThanConditionInstance = greaterThanCondition(10);
+    expect(greaterThanConditionInstance(null)).toBe(undefined);
+    expect(greaterThanConditionInstance(undefined)).toBe(undefined);
+    expect(greaterThanConditionInstance(3)).toBe('Field must be greater than 10');
+    expect(greaterThanConditionInstance(10)).toBe('Field must be greater than 10');
+});
+
+test('test smaller than condition', () => {
+    const smallerThanConditionInstance = smallerThanCondition(10);
+    expect(smallerThanConditionInstance(null)).toBe(undefined);
+    expect(smallerThanConditionInstance(undefined)).toBe(undefined);
+    expect(smallerThanConditionInstance(30)).toBe('The field must be smaller than 10');
+    expect(smallerThanConditionInstance(10)).toBe('The field must be smaller than 10');
+});
+
+test('test greater than or equal to condition', () => {
+    const greaterThanOrEqualToConditionInstance = greaterThanOrEqualToCondition(10);
+    expect(greaterThanOrEqualToConditionInstance(null)).toBe(undefined);
+    expect(greaterThanOrEqualToConditionInstance(undefined)).toBe(undefined);
+    expect(greaterThanOrEqualToConditionInstance(3)).toBe('The field must be greater than or equal to 10');
+});
+
+test('test less than or equal to condition', () => {
+    const lessThanOrEqualToConditionInstance = lessThanOrEqualToCondition(10);
+    expect(lessThanOrEqualToConditionInstance(null)).toBe(undefined);
+    expect(lessThanOrEqualToConditionInstance(undefined)).toBe(undefined);
+    expect(lessThanOrEqualToConditionInstance(30)).toBe('The field must be smaller than or equal to 10');
+});
+
+test('test integer condition', () => {
+    expect(integerCondition(null)).toBe(undefined);
+    expect(integerCondition(undefined)).toBe(undefined);
+    expect(integerCondition(-12)).toBe(undefined);
+    expect(integerCondition(12)).toBe(undefined);
+    expect(integerCondition(1.2)).toBe('The field must be an integer');
+    expect(integerCondition(-1.2)).toBe('The field must be an integer');
+    expect(integerCondition(0)).toBe(undefined);
+    expect(integerCondition(NaN)).toBe('The field must be an integer');
+});
+
+test('test email condition', () => {
+    expect(emailCondition(null)).toBe(undefined);
+    expect(emailCondition(undefined)).toBe(undefined);
+    expect(emailCondition('')).toBe(undefined);
+    expect(emailCondition('freddy_mercury@gmail.com')).toBe(undefined);
+    expect(emailCondition('freddy_mercury.com')).toBe('The field must be a valid email');
+    expect(emailCondition('freddy_mercury')).toBe('The field must be a valid email');
+    expect(emailCondition('freddy_mercury@gmail')).toBe('The field must be a valid email');
+});
+
+test('test url condition', () => {
+    expect(urlCondition(null)).toBe(undefined);
+    expect(urlCondition(undefined)).toBe(undefined);
+    expect(urlCondition('')).toBe(undefined);
+    expect(urlCondition('https://www.google.com')).toBe(undefined);
+    expect(urlCondition('https://google')).toBe('The field must be a valid url');
+    expect(urlCondition('google.com')).toBe('The field must be a valid url');
+    expect(urlCondition('www.google.com')).toBe('The field must be a valid url');
+    expect(urlCondition('google')).toBe('The field must be a valid url');
+    expect(urlCondition('https:www.google.com')).toBe('The field must be a valid url');
 });
