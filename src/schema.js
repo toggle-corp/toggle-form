@@ -26,6 +26,8 @@ export const accumulateValues = (
     obj,
     schema,
     settings = {},
+    baseValue = obj,
+    context,
 ) => {
     const {
         nullable = false,
@@ -71,8 +73,14 @@ export const accumulateValues = (
         const values = [];
         if (obj) {
             obj.forEach((element) => {
-                const localMember = member(element);
-                const value = accumulateValues(element, localMember, settings);
+                const localMember = member(element, baseValue, context);
+                const value = accumulateValues(
+                    element,
+                    localMember,
+                    settings,
+                    baseValue,
+                    context,
+                );
                 values.push(value);
             });
         }
@@ -85,9 +93,15 @@ export const accumulateValues = (
     }
     if (isSchemaForObject) {
         const values = {};
-        const localFields = fields(obj);
+        const localFields = fields(obj, baseValue, context);
         Object.keys(localFields).forEach((fieldName) => {
-            const value = accumulateValues(obj?.[fieldName], localFields[fieldName], settings);
+            const value = accumulateValues(
+                obj?.[fieldName],
+                localFields[fieldName],
+                settings,
+                baseValue,
+                context,
+            );
             if (value !== undefined) {
                 values[fieldName] = value;
             }

@@ -409,12 +409,22 @@ function useForm<T extends object, C>(
             const stateErrored = analyzeErrors(stateErrors);
             if (stateErrored) {
                 const value = accumulateOnError
-                    ? accumulateValues(state.value, schema, { nullable: true })
-                    : undefined;
+                    ? accumulateValues(
+                        state.value,
+                        schema,
+                        { nullable: true },
+                        state.value, context,
+                    ) : undefined;
                 return { errored: true, error: stateErrors as Error<T>, value };
             }
             // NOTE: server needs `null` to identify that the value is not defined
-            const validatedValues = accumulateValues(state.value, schema, { nullable: true });
+            const validatedValues = accumulateValues(
+                state.value,
+                schema,
+                { nullable: true },
+                state.value,
+                context,
+            );
             return { errored: false, value: validatedValues, error: undefined };
         },
         [schema, state, context],

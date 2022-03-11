@@ -55,6 +55,7 @@ const schema: FormSchema = {
                 address: [],
             };
         }
+
         return baseSchema;
     },
 };
@@ -115,7 +116,7 @@ export const Default = () => {
                 {step === 2 && (
                     <>
                         <TextInput
-                            label="Address *"
+                            label="Address"
                             name="address"
                             value={value.address}
                             onChange={setFieldValue}
@@ -129,7 +130,7 @@ export const Default = () => {
                             error={error?.age}
                         />
                         <TextInput
-                            label="Job"
+                            label="Job*"
                             name="job"
                             value={value.job}
                             onChange={setFieldValue}

@@ -54,14 +54,15 @@ export function accumulateValues<T, C>(
     obj: T,
     schema: Schema<T, T, C>,
     settings?: { nullable: boolean },
-    // FIXME: accumulateValues also requires context
+    baseValue: T,
+    context: C,
 ): T;
 
 export function accumulateErrors<T, C>(
     obj: T,
     schema: Schema<T, T, C>,
     baseValue: T,
-    context?: C,
+    context: C,
 ): Error<T> | undefined;
 
 export function accumulateDifferentialErrors<T, C>(

@@ -21,9 +21,11 @@ export function createSubmitHandler<T>(
         if (value.errored === false) {
             setError(value.error, value.value);
             successCallback(value.value);
-        } else if (failureCallback) {
+        } else {
             setError(value.error, value.value);
-            failureCallback(value.value, value.error);
+            if (failureCallback) {
+                failureCallback(value.value, value.error);
+            }
         }
     };
 }
