@@ -531,7 +531,7 @@ import Button from '../../components/Button';
 type PartialForm<T> = RawPartialForm<T, 'clientId'>;
 
 interface FormType {
-  userLists?: {
+  userList?: {
     clientId: string | number;
     name?: string;
     age?: string;
@@ -543,7 +543,7 @@ type BaseFormType = PartialForm<FormType>;
 type FormSchema = ObjectSchema<FormType, BaseFormType>;
 type FormSchemaFields = ReturnType<FormSchema['fields']>;
 
-type UserType = NonNullable<NonNullable<FormType['userLists']>>[number];
+type UserType = NonNullable<NonNullable<FormType['userList']>>[number];
 type UserSchema = ObjectSchema<PartialForm<UserType>, BaseFormType>;
 type UserSchemaFields = ReturnType<UserSchema['fields']>;
 type UserListsSchema = ArraySchema<PartialForm<UserType>, BaseFormType>;
@@ -551,7 +551,7 @@ type UserListsSchemaMember = ReturnType<UserListsSchema['member']>;
 
 const schema: FormSchema = {
   fields: (): FormSchemaFields => ({
-    userLists: {
+    userList: {
       keySelector: (c) => c.clientId,
       member: (): UserListsSchemaMember => ({
         fields: (): UserSchemaFields => ({
@@ -646,13 +646,13 @@ function FormArrayExample() {
   );
 
   const error = getErrorObject(riskyError);
-  const arrayError = getErrorObject(error?.userLists);
+  const arrayError = getErrorObject(error?.userList);
 
-  type UserCollections = typeof value.userLists;
+  type UserCollections = typeof value.userList;
   const {
     setValue: onCollectionChange,
     removeValue: onCollectionRemove,
-  } = useFormArray('userLists', setFieldValue);
+  } = useFormArray('userList', setFieldValue);
 
   const handleCollectionAdd = React.useCallback(
     () => {
@@ -664,7 +664,7 @@ function FormArrayExample() {
         (oldValue: PartialForm<UserCollections>) => (
           [...(oldValue ?? []), newCollection]
         ),
-        'userLists' as const,
+        'userList' as const,
       );
     },
     [setFieldValue],
@@ -679,8 +679,8 @@ function FormArrayExample() {
         >
           Add user
         </Button>
-        {value.userLists?.length ? (
-          value.userLists.map((users, index) => (
+        {value.userList?.length ? (
+          value.userList.map((users, index) => (
             <UserCollectionInput
               key={users.clientId}
               index={index}
