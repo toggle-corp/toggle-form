@@ -37,7 +37,8 @@ type FormType = {
     confirmPassword?: string;
     interests?: string[];
 };
-type FormSchema = ObjectSchema<PartialForm<FormType>>
+type PartForm =PartialForm<FormType>;
+type FormSchema = ObjectSchema<PartForm>
 type FormSchemaFields = ReturnType<FormSchema['fields']>;
 
 const schema: FormSchema = {
@@ -87,7 +88,7 @@ export const Default = () => {
         validate,
         setError,
         setValue,
-    } = useForm(schema, defaultFormValues);
+    } = useForm(schema, { value: defaultFormValues });
 
     const handleSubmit = useCallback(
         (finalValues: PartialForm<FormType>) => {
@@ -151,7 +152,7 @@ export const WithValidation = () => {
         validate,
         setError,
         setValue,
-    } = useForm(schemaWithValidation, defaultFormValues);
+    } = useForm(schemaWithValidation, { value: defaultFormValues });
 
     const handleSubmit = useCallback(
         (finalValues: PartialForm<FormType>) => {
@@ -215,7 +216,7 @@ export const WithCustomValidation = () => {
         validate,
         setError,
         setValue,
-    } = useForm(schemaWithCustomValidation, defaultFormValues);
+    } = useForm(schemaWithCustomValidation, { value: defaultFormValues });
 
     const handleSubmit = useCallback(
         (finalValues: PartialForm<FormType>) => {

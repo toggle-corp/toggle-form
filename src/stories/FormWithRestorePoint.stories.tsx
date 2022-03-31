@@ -37,7 +37,8 @@ type FormType = {
     confirmPassword?: string;
     interests?: string[];
 };
-type FormSchema = ObjectSchema<PartialForm<FormType>>
+type PartForm = PartialForm<FormType>;
+type FormSchema = ObjectSchema<PartForm>
 type FormSchemaFields = ReturnType<FormSchema['fields']>;
 
 const schemaWithValidation: FormSchema = {
@@ -64,7 +65,7 @@ export const Default = () => {
         restore,
         createRestorePoint,
         clearRestorePoint,
-    } = useForm(schemaWithValidation, defaultFormValues);
+    } = useForm(schemaWithValidation, { value: defaultFormValues });
 
     const handleErrorToggle = useCallback(
         () => {

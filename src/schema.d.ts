@@ -1,27 +1,31 @@
 import { internal } from './types';
 
-export type Schema<T, V=T> = (
+export type Schema<T, V = T, C = undefined> = (
     Exclude<T, undefined> extends unknown[]
-        ? ArraySchema<Exclude<T, undefined>[number], V> | LiteralSchema<T, V>
+        ? ArraySchema<Exclude<T, undefined>[number], V, C> | LiteralSchema<T, V, C>
         : (
             // eslint-disable-next-line @typescript-eslint/ban-types
             Exclude<T, undefined> extends object
-                ? ObjectSchema<Exclude<T, undefined>, V> | LiteralSchema<T, V>
-                : LiteralSchema<T, V>
+                ? ObjectSchema<Exclude<T, undefined>, V, C> | LiteralSchema<T, V, C>
+                : LiteralSchema<T, V, C>
           )
 );
 
-export type LiteralSchema<T, V> = ((value: T, baseValue: V) => string | undefined)[];
+export type LiteralSchema<T, V = T, C = undefined> = (
+    (value: T, baseValue: V, context: C) => string | undefined
+)[];
 
-export type ArraySchema<T, V=T> = {
-    validation?: (value: T[] | undefined) => string | undefined;
-    member: (value: T) => Schema<T, V>;
+export type ArraySchema<T, V = T, C = undefined> = {
+    validation?: (value: T[] | undefined, allValue: V, context: C) => string | undefined;
+    member: (value: T, allValue: V, context: C) => Schema<T, V, C>;
     keySelector: (value: T) => string | number;
 }
 
-export type ObjectSchema<T, V=T> = {
-    validation?: (value: T | undefined) => string | undefined;
-    fields: (value: T | undefined) => ({ [K in keyof T]: Schema<T[K], V> });
+export type ObjectSchema<T, V = T, C = undefined> = {
+    validation?: (value: T | undefined, allValue: V, context: C) => string | undefined;
+    fields: (value: T | undefined, allValue: V, context: C) => (
+        { [K in keyof T]: Schema<T[K], V, C> }
+    );
     fieldDependencies?: (value: T | undefined) => ({ [K in keyof T]: (keyof T)[]});
 }
 
@@ -46,24 +50,32 @@ export type ObjectError<T> = {
     [K in keyof T]?: Error<T[K]> | undefined;
 } & { [internal]?: string }
 
-export function accumulateValues<T>(
+export function accumulateValues<T, C>(
     obj: T,
-    schema: Schema<T>,
+    schema: Schema<T, T, C>,
     settings?: { nullable: boolean },
+    baseValue: T,
+    context: C,
 ): T;
 
-export function accumulateErrors<T>(
+export function accumulateErrors<T, C>(
     obj: T,
-    schema: Schema<T>,
-    // value: T,
+    schema: Schema<T, T, C>,
+    baseValue: T,
+    context: C,
 ): Error<T> | undefined;
 
-export function accumulateDifferentialErrors<T>(
+export function accumulateDifferentialErrors<T, C>(
     oldObj: T,
     newObj: T,
     oldError: Error<T> | undefined,
-    schema: Schema<T>,
-    // value: T,
+    schema: Schema<T, T, C>,
+    baseValue: T,
+    // FIXME: move this below context
+    force = false,
+    context: C,
 ): Error<T> | undefined;
 
-export function analyzeErrors<T>(errors: ArrayError<T> | ObjectError<T> | LeafError): boolean;
+export function analyzeErrors<T>(
+    errors: ArrayError<T> | ObjectError<T> | LeafError
+): boolean;
