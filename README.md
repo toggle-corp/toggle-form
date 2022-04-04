@@ -34,6 +34,7 @@ yarn add @togglecorp/toggle-form@beta
   - [createSubmitHandler](#createsubmithandler)
   - [useFormArray](#useformarray)
   - [useFormObject](#useformobject)
+  - [Schema](#schema)
 
 ---
 ## Note:
@@ -701,5 +702,58 @@ export default FormArrayExample;
 
   ```
 </details>
+
+## Schema 
+The schema defines to the structure of the form. The schema can defined for the objects, arrays and literals. We also provides schema-based validation and you can also use your custom validation function.
+### Object Schema
+The schema object is an object with these properties:
+
+|property|description|
+|----|----|
+|validation|Function to validate the object|
+|fields|Function that defines the schema for each key of the object|
+|fieldDependencies|Function that defines the dependency between object keys|
+
+### Array Schema
+The array schema is an object with these properties:
+
+|property|description|
+|----|----|
+|validation|Function to validate the array|
+|members|Function that defines the schema for each item of the array|
+|keySelector|Function that defines the unique key for each item of the array|
+
+### Literal Schema
+The literal schema is an array of validation functions.
+The validation function accepts the current value and the overall form value.
+The validation function can either return a string or undefined; the string
+return value is interpreted as an error.
+
+### Validation Function
+It will validate your input data against the schema and return with either errors or a valid result.
+The library provides these validations functions:
+
+- requiredCondition
+- requiredStringCondition
+- requiredListCondition
+- backlistCondition
+- whitelistCondition
+- lengthGreaterThanCondition
+- lengthSmallerThanCondition
+- greaterThanCondition
+- smallerThanCondition
+- greaterThanOrEqualToCondition
+- integerCondition
+- emailCondition
+- urlCondition
+  
+  You can also add your custom validation function:
+  ```typescript
+    export function max10CharCondition(value: any) {
+    return (value) && value.length > 10
+      ? 'only 10 characters are allowed'
+      : undefined;
+  }
+  ```
 
 ---
