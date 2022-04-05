@@ -10,7 +10,6 @@ The library exposes three react hooks to define a form:
 
 
 ## Prerequisites
-- [Node](https://nodejs.org/en/)
 - Understanding of [TypeScript](https://www.typescriptlang.org/)
 
 ---
@@ -22,7 +21,6 @@ yarn install
 yarn add @togglecorp/toggle-form@beta 
 ```
 ---
-
 ## Table of Contents
   - [Quick start](#quick-start)
   - [useForm](#useform)
@@ -39,7 +37,7 @@ yarn add @togglecorp/toggle-form@beta
 ---
 ## Note:
 
-  In this documentation, we will be using the `RawInput` component instead of `input`.
+  We cannot use input directly with toggle form. We will be using the `RawInput` component instead of `input`.
 
   To set value for each field in the form, it requires `name`, `value` parameter whereas `input` return `event` comprise of name, value, and other props. So to maintain compatibility with toggle-form, the `input` component is customized as `RawInput`.
 
@@ -105,7 +103,6 @@ export default RawInput;
   - `Toggle Form` takes care of the repetitive and annoying stuff and tracks:
       - value
       - error
-      - visited field
       - validation
       - handling submission
   
@@ -208,12 +205,12 @@ export default FormExample;
 ` useForm ` hook is used to control a form. It takes optional arguments, described below:
 
 **The `useForm` hook accepts these options:**
-| option   | description                                                                                                  |
-| -------- | ------------------------------------------------------------------------------------------------------------ |
-| schema   | The schema used to validate the form                                                                         |
-| value    | The initial value for the form                                                                               |
-| pristine | Returns false when the form gets spoilt. <br> helps to keep track with the user's interaction with the form. |
-| error    | The error state of form.                                                                                     |
+| option   | description  |
+| -------- | -------------------------------------------------------------------- |
+| schema   | The schema used to validate the form  |
+| value    | The initial value for the form       |
+| pristine | Returns false when the form gets spoilt. It helps to keep track with the user's interaction with the form. |
+| error    | The error state of form. |
 
   ```typescript
   type FormInput = {
@@ -260,16 +257,12 @@ export default FormExample;
     age: '25',
   }), []);
 
-  React.useEffect(() => {
-    setValue(data);
-  }, [data, setValue]);
+  setValue(data);
 
   // OR,
-  //React.useEffect(() => {
   //  setValue({
   //    name: data.name,
   //  });
-  //}, [data]);
 
   return (
     <RawInput
@@ -318,13 +311,13 @@ type conversion of errors as object.
     {
       value:{},
     },
-    );
+  );
 
   const error = getErrorObject(riskyError);
 ```
 
 ### createSubmitHandler
-  `createSubmitHandler`is invoked on form submission. This function will receive the form data if the validation is successful. All the utility functions passed as parameters are used sequentially.
+  `createSubmitHandler`is invoked on form submission. This function will receive the form data if the validation is successful.
 
   ```typescript
     <form
@@ -338,12 +331,12 @@ type conversion of errors as object.
   | ------------ | ------------------------------------------|
   | validate     | used to check the truth value of the form. |
   | setError     | used to sets form error.                 |
-  | handleSubmit | function used to submit form value. <br> handleSubmit will validate your inputs before invoking ` onSubmit ` |
+  | handleSubmit | function used to submit form value. handleSubmit will validate your inputs before invoking ` onSubmit ` |
 
   The form is only submitted if it passed the above validation or has sanitized value.
 
 ## useFormObject
-  `useFormObject` is used to control an object. The useFormObject hook accepts options: 
+  `useFormObject` is used to control an object. The `useFormObject` hook accepts options: 
 
   | option       | description                         |
   | ------------ | ----------------------------------- |
@@ -494,14 +487,14 @@ export default FormObjectExample;
 
   ## useFormArray
   `useFormArray` hook is used to control an array. The 
-  useFormArray hook accepts these options:
+  `useFormArray` hook accepts these options:
 
   | option   | description                 |
   | -------- | ----------------------------|
   | name     | name of the array field     |
   | onChange | change handler of the array |
 
-  The return value from useFormArray are as follows:
+  The return value from `useFormArray` are as follows:
 
   | value       | description                            |
   | ----------- | -------------------------------------- |
@@ -704,7 +697,7 @@ export default FormArrayExample;
 </details>
 
 ## Schema 
-The schema defines to the structure of the form. The schema can defined for the objects, arrays and literals. We also provides schema-based validation and you can also use your custom validation function.
+The schema defines to the structure of the form. The schema can be defined for the objects, arrays and literals. We also provides schema-based validation and you can also use your custom validation function.
 ### Object Schema
 The schema object is an object with these properties:
 
@@ -729,9 +722,9 @@ The validation function accepts the current value and the overall form value.
 The validation function can either return a string or undefined; the string
 return value is interpreted as an error.
 
-### Validation Function
+### Validation Functions
 It will validate your input data against the schema and return with either errors or a valid result.
-The library provides these validations functions:
+The library provides these validation functions:
 
 - requiredCondition
 - requiredStringCondition
@@ -755,5 +748,26 @@ The library provides these validations functions:
       : undefined;
   }
   ```
+
+### Special validation functions
+
+#### forceNullType
+
+Sometimes we would want to clear value for certain fields. We can use
+`forceNullType` to conditionally clear values.
+
+#### forceEmptyArrayType
+
+Sometimes we would want to clear value for certain fields. We can use
+`forceEmptyArrayType` to conditionally clear array values.
+
+#### defaultUndefinedType
+
+The form sets `null` to indicate there is no information. On special cases, we
+would want to set `undefined` instead of `null`.
+
+#### defaultEmptyArrayType
+
+For array type, we would want to set `[]` to when there is no data.
 
 ---
