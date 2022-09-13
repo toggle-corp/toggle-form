@@ -228,7 +228,7 @@ export const accumulateDifferentialErrors = (
 
     const errors = {};
     if (validation) {
-        const validationErrors = validation(newObj);
+        const validationErrors = validation(newObj, baseValue, context);
         if (validationErrors) {
             errors[internal] = validationErrors;
         }

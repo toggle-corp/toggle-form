@@ -76,14 +76,14 @@ type State<T> = {
 });
 
 // eslint-disable-next-line @typescript-eslint/ban-types
-function useForm<T extends object, C = undefined>(
-    schema: Schema<T, T, C>,
+function useForm<T extends object>(
+    schema: Schema<T, T, undefined>,
     initialState: {
         value: T,
         error?: Error<T>,
         pristine?: boolean,
     },
-    context?: undefined,
+    context?: never,
 ): {
     value: T,
     error: Error<T> | undefined,
