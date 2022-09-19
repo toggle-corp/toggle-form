@@ -39,7 +39,7 @@ interface ErrorAction<T extends object> {
 interface ValueAction<T extends object> {
     type: 'SET_VALUE';
     value: SetBaseValueArg<T>;
-    doNotReset: boolean | undefined;
+    partiallySetValue: boolean | undefined;
 }
 interface PristineAction {
     type: 'SET_PRISTINE';
@@ -92,7 +92,7 @@ function useForm<T extends object>(
 
     setPristine: (pristine: boolean) => void,
     setError: (errors: SetErrorArg<Error<T>> | undefined) => void,
-    setValue: (value: SetBaseValueArg<T>, doNotReset?: boolean) => void,
+    setValue: (value: SetBaseValueArg<T>, partiallySetValue?: boolean) => void,
     setFieldValue: (...entries: EntriesAsList<T>) => void,
 
     hasRestorePoint: boolean,
@@ -121,7 +121,7 @@ function useForm<T extends object, C>(
 
     setPristine: (pristine: boolean) => void,
     setError: (errors: SetErrorArg<Error<T>> | undefined) => void,
-    setValue: (value: SetBaseValueArg<T>, doNotReset?: boolean) => void,
+    setValue: (value: SetBaseValueArg<T>, partiallySetValue?: boolean) => void,
     setFieldValue: (...entries: EntriesAsList<T>) => void,
 
     hasRestorePoint: boolean,
@@ -150,7 +150,7 @@ function useForm<T extends object, C>(
 
     setPristine: (pristine: boolean) => void,
     setError: (errors: SetErrorArg<Error<T>> | undefined) => void,
-    setValue: (value: SetBaseValueArg<T>, doNotReset?: boolean) => void,
+    setValue: (value: SetBaseValueArg<T>, partiallySetValue?: boolean) => void,
     setFieldValue: (...entries: EntriesAsList<T>) => void,
 
     hasRestorePoint: boolean,
@@ -230,14 +230,14 @@ function useForm<T extends object, C>(
             if (action.type === 'SET_VALUE') {
                 const {
                     value: valueFromAction,
-                    doNotReset,
+                    partiallySetValue,
                 } = action;
 
                 const newValue = isBaseCallable(valueFromAction)
                     ? valueFromAction(prevState.value)
                     : valueFromAction;
 
-                if (doNotReset) {
+                if (partiallySetValue) {
                     const oldError = prevState.error;
                     const oldValue = prevState.value;
 
@@ -379,11 +379,11 @@ function useForm<T extends object, C>(
     );
 
     const setValue = useCallback(
-        (value: SetBaseValueArg<T>, doNotReset: boolean | undefined) => {
+        (value: SetBaseValueArg<T>, partiallySetValue: boolean | undefined) => {
             const action: ValueAction<T> = {
                 type: 'SET_VALUE',
                 value,
-                doNotReset,
+                partiallySetValue,
             };
             dispatch(action);
         },
@@ -413,7 +413,8 @@ function useForm<T extends object, C>(
                         state.value,
                         schema,
                         { nullable: true },
-                        state.value, context,
+                        state.value,
+                        context,
                     ) : undefined;
                 return { errored: true, error: stateErrors as Error<T>, value };
             }
