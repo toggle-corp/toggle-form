@@ -9,6 +9,7 @@ import {
 
 test('test isLocalUrl condition', () => {
     expect(isLocalUrl('https://localhost:3000/')).toBe(true);
+    expect(isLocalUrl('https://google.com')).toBe(false);
     expect(isLocalUrl('https://www.localhost.com')).toBe(false);
     expect(isLocalUrl('localhost.com')).toBe(false);
     expect(isLocalUrl('')).toBe(false);
@@ -22,13 +23,19 @@ test('test isValidUrl condition', () => {
     expect(isValidUrl('google.com')).toBe(false);
     expect(isValidUrl('www.google.com')).toBe(false);
     expect(isValidUrl('https://www.google.com')).toBe(true);
+    expect(isValidUrl('https://www.google.com#page=1')).toBe(true);
+    expect(isValidUrl('https://www.google.com?page=1&referrer=idk')).toBe(true);
+    expect(isValidUrl('https://localhost:3000/')).toBe(true);
 });
 
 test('test isDefined condition', () => {
     expect(isDefined(null)).toBe(false);
     expect(isDefined(undefined)).toBe(false);
     expect(isDefined('')).toBe(true);
-    expect(isDefined('Hello jest')).toBe(true);
+    expect(isDefined('Hello World!')).toBe(true);
+    expect(isDefined([])).toBe(true);
+    expect(isDefined({})).toBe(true);
+    expect(isDefined(0)).toBe(true);
     expect(isDefined(40)).toBe(true);
     expect(isDefined(-40)).toBe(true);
     expect(isDefined(1.2)).toBe(true);
@@ -38,7 +45,8 @@ test('test isDefinedString condition', () => {
     expect(isDefinedString(null)).toBe(false);
     expect(isDefinedString(undefined)).toBe(false);
     expect(isDefinedString('')).toBe(false);
-    expect(isDefinedString('Hello jest ###')).toBe(true);
+    expect(isDefinedString(' ')).toBe(false);
+    expect(isDefinedString('Hello World!')).toBe(true);
 });
 
 test('test hasNoKeys condition', () => {
@@ -61,19 +69,25 @@ test('test hasNoKeys condition', () => {
         4: null,
         5: undefined,
     })).toBe(false);
+    expect(hasNoKeys({
+        1: null,
+    })).toBe(false);
+    expect(hasNoKeys({
+        1: undefined,
+    })).toBe(false);
 });
 
 test('test hasNoValues condition', () => {
     expect(hasNoValues(null)).toBe(true);
     expect(hasNoValues(undefined)).toBe(true);
     expect(hasNoValues([])).toBe(true);
-    expect(hasNoValues(['', 'word', null, undefined])).toBe(false);
-    expect(hasNoValues([
-        '',
-        [],
-        {},
-        -1.2,
-        24,
-        'name',
-    ])).toBe(false);
+    expect(hasNoValues([null, undefined])).toBe(true);
+    expect(hasNoValues([null])).toBe(true);
+    expect(hasNoValues([undefined])).toBe(true);
+
+    expect(hasNoValues([0])).toBe(false);
+    expect(hasNoValues(['hello', 'world'])).toBe(false);
+    expect(hasNoValues(['', null, undefined])).toBe(false);
+    expect(hasNoValues([[], [], []])).toBe(false);
+    expect(hasNoValues([{}, {}])).toBe(false);
 });

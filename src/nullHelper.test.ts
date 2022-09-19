@@ -9,7 +9,7 @@ test('test removeNull condition', () => {
     expect(removeNull([1, null, 2, undefined, '10'])).toStrictEqual([1, 2, '10']);
     expect(removeNull([
         10,
-        'toggleCorp',
+        'tc',
         null,
         {
             name: 'John',
@@ -26,7 +26,7 @@ test('test removeNull condition', () => {
         ],
     ])).toStrictEqual([
         10,
-        'toggleCorp',
+        'tc',
         {
             name: 'John',
             age: 24,
@@ -40,7 +40,7 @@ test('test removeNull condition', () => {
         name: 'John',
         age: 24,
         office: {
-            name: 'toggleCorp',
+            name: 'tc',
             location: 'lalitpur',
             code: null,
             type: undefined,
@@ -62,7 +62,7 @@ test('test removeNull condition', () => {
         name: 'John',
         age: 24,
         office: {
-            name: 'toggleCorp',
+            name: 'tc',
             location: 'lalitpur',
         },
         skills: [

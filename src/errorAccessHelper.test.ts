@@ -7,32 +7,46 @@ import { internal } from './types';
 test('test getErrorObject condition', () => {
     expect(getErrorObject(null)).toBe(undefined);
     expect(getErrorObject(undefined)).toBe(undefined);
-    expect(getErrorObject('some string')).toStrictEqual({
-        [internal]: 'some string',
+    expect(getErrorObject('We have some error!')).toStrictEqual({
+        [internal]: 'We have some error!',
     });
     expect(getErrorObject({
-        nameError: 'This is required',
-        ageError: 'This is required',
+        name: 'This is required',
+        age: 'This is required',
     })).toStrictEqual({
-        nameError: 'This is required',
-        ageError: 'This is required',
+        name: 'This is required',
+        age: 'This is required',
     });
     expect(getErrorObject({
-        nameError: null,
-        rollError: undefined,
-        ageError: 'This is required',
+        name: null,
+        roll: undefined,
+        age: 'This is required',
     })).toStrictEqual({
-        nameError: null,
-        rollError: undefined,
-        ageError: 'This is required',
+        name: null,
+        roll: undefined,
+        age: 'This is required',
+    });
+    expect(getErrorObject({
+        [internal]: 'We have some error!',
+        name: 'This is required',
+        age: 'This is required',
+    })).toStrictEqual({
+        [internal]: 'We have some error!',
+        name: 'This is required',
+        age: 'This is required',
     });
 });
 
 test('test getErrorString condition', () => {
     expect(getErrorString(null)).toBe(undefined);
     expect(getErrorString(undefined)).toBe(undefined);
-    expect(getErrorString('some random string')).toBe('some random string');
+    expect(getErrorString({})).toStrictEqual(undefined);
     expect(getErrorString({
-        [internal]: 'some random string',
-    })).toStrictEqual('some random string');
+        name: 'This is required',
+        age: 'This is required',
+    })).toStrictEqual(undefined);
+    expect(getErrorString('We have some error!')).toBe('We have some error!');
+    expect(getErrorString({
+        [internal]: 'We have some error',
+    })).toStrictEqual('We have some error');
 });

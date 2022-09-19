@@ -52,409 +52,95 @@ interface FormType {
 type FormSchema = ObjectSchema<PartialForm<FormType>>
 type FormSchemaFields = ReturnType<FormSchema['fields']>;
 
-const formTypeSchema: FormSchema = {
-    fields: (): FormSchemaFields => ({
-        name: [],
-        email: [],
-        familyName: [requiredCondition],
-        address: [],
-        countryDistrict: {
-            keySelector: (c) => c.clientId as string,
-            member: () => ({
-                fields: () => ({
-                    clientId: [forceUndefinedType],
-                    country: [forceNullType],
-                    district: [],
-                    streets: [forceEmptyArrayType],
-                    locations: [],
-                    clientInfo: {
-                        fields: () => ({
-                            userName: [],
-                            userAddress: [defaultUndefinedType],
-                            userLocations: [defaultEmptyArrayType],
-                            citizenCode: {
-                                fields: () => ({
-                                    roll: [],
-                                }),
-                            },
-                        }),
-                    },
-                }),
-            }),
-        },
-    }),
-};
-
-const errorFormTypeSchema: FormSchema = {
-    fields: (): FormSchemaFields => ({
-        name: [(name) => {
-            if (name && name.length < 5) {
-                return 'length of name must be greater than 5';
-            }
-            return undefined;
-        }],
-        email: [],
-        familyName: [requiredStringCondition],
-        password: [],
-        confirmPassword: [],
-        address: [],
-        startDate: [],
-        endDate: [(currentEndDate, allValue) => {
-            if (allValue.startDate >= currentEndDate) {
-                return 'End date should be greater than start date';
-            }
-
-            return undefined;
-        }],
-        countryDistrict: {
-            keySelector: (c) => c.clientId as string,
-            member: () => ({
-                fields: () => ({
-                    clientId: [forceUndefinedType],
-                    country: [forceNullType],
-                    district: [],
-                    streets: [forceEmptyArrayType],
-                    locations: [],
-                    clientInfo: {
-                        fields: () => ({
-                            userName: [],
-                            userAddress: [defaultUndefinedType],
-                            userLocations: [defaultEmptyArrayType],
-                            citizenCode: {
-                                fields: () => ({
-                                    roll: [requiredCondition],
-                                }),
-                            },
-                        }),
-                    },
-                }),
-            }),
-        },
-    }),
-    fieldDependencies: () => ({
-        endDate: ['startDate'],
-    }),
-    validation: (value) => {
-        if (value?.password !== value?.confirmPassword) {
-            return 'The passwords do not match.';
-        }
-        return undefined;
-    },
-};
-
-const data: PartialForm<FormType> = {
-    name: 'Priyesh',
-    familyName: '',
-    email: 'priyesh@togglecorp.com',
-    address: 'Kalanki',
-    countryDistrict: [
-        {
-            clientId: '301A',
-            country: 16,
-            district: 100,
-            streets: [
-                'house 1',
-                'house 2',
-            ],
-            locations: [
-                'locate 1',
-                'locate 2',
-            ],
-            clientInfo: {
-                userName: 'Jimmy',
-                userAddress: 'New Road',
-                userLocations: [
-                    'Teku',
-                    'Pako New-road',
-                ],
-                citizenCode: {},
-            },
-        },
-        {
-            clientId: undefined,
-            country: null,
-            district: 100,
-            streets: [],
-            locations: [],
-            clientInfo: {
-                userName: '',
-                userLocations: [],
-                citizenCode: {},
-            },
-        },
-        {
-            clientId: '311Q',
-            country: null,
-            district: 100,
-            streets: [],
-            locations: [],
-            clientInfo: {
-                userName: '',
-                userLocations: [],
-                citizenCode: {},
-            },
-        },
-    ],
-};
-
-const errorCheckData: PartialForm<FormType> = {
-    name: 'Pri',
-    familyName: '',
-    password: 'admin123',
-    confirmPassword: '123',
-    email: 'priyesh@togglecorp.com',
-    address: 'Kalanki',
-    countryDistrict: [
-        {
-            clientId: '301A',
-            country: 16,
-            district: 100,
-            streets: [
-                'house 1',
-                'house 2',
-            ],
-            locations: [
-                'locate 1',
-                'locate 2',
-            ],
-            clientInfo: {
-                userName: 'Jimmy',
-                userAddress: 'New Road',
-                userLocations: [
-                    'Teku',
-                    'Pako New-road',
-                ],
-                citizenCode: {
-                    roll: 1223,
-                },
-            },
-        },
-        {
-            clientId: undefined,
-            country: null,
-            district: 100,
-            streets: [],
-            locations: [],
-            clientInfo: {
-                userName: '',
-                userLocations: [],
-                citizenCode: {
-                    roll: 2234,
-                },
-            },
-        },
-        {
-            clientId: '311Q',
-            country: null,
-            district: 100,
-            streets: [],
-            locations: [],
-            clientInfo: {
-                userName: '',
-                userLocations: [],
-                citizenCode: {},
-            },
-        },
-    ],
-};
-
-const oldDifferentialData: PartialForm<FormType> = {
-    name: 'Jimmy',
-    familyName: 'Hopkins',
-    password: 'admin123',
-    confirmPassword: 'admin123',
-    email: 'priyesh@togglecorp.com',
-    address: 'Kalanki',
-    startDate: 100,
-    endDate: 100,
-    countryDistrict: [
-        {
-            clientId: '301A',
-            country: 16,
-            district: 100,
-            streets: [
-                'house 1',
-                'house 2',
-            ],
-            locations: [
-                'locate 1',
-                'locate 2',
-            ],
-            clientInfo: {
-                userName: 'Jimmy',
-                userAddress: 'New Road',
-                userLocations: [
-                    'Teku',
-                    'Pako New-road',
-                ],
-                citizenCode: {
-                    roll: 1223,
-                },
-            },
-        },
-        {
-            clientId: undefined,
-            country: null,
-            district: 100,
-            streets: [],
-            locations: [],
-            clientInfo: {
-                userName: '',
-                userLocations: [],
-                citizenCode: {
-                    roll: 1223,
-                },
-            },
-        },
-        {
-            clientId: '311Q',
-            country: null,
-            district: 100,
-            streets: [],
-            locations: [],
-            clientInfo: {
-                userName: '',
-                userLocations: [],
-                citizenCode: {
-                    roll: 1223,
-                },
-            },
-        },
-    ],
-};
-
-const similarDifferentialData: PartialForm<FormType> = {
-    name: 'Jim',
-    familyName: 'Hopkins',
-    password: 'admin123',
-    confirmPassword: 'admin123',
-    email: 'priyesh@togglecorp.com',
-    address: 'Kalanki',
-    startDate: 100,
-    endDate: 100,
-    countryDistrict: [
-        {
-            clientId: '301A',
-            country: 16,
-            district: 100,
-            streets: [
-                'house 1',
-                'house 2',
-            ],
-            locations: [
-                'locate 1',
-                'locate 2',
-            ],
-            clientInfo: {
-                userName: 'Jimmy',
-                userAddress: 'New Road',
-                userLocations: [
-                    'Teku',
-                    'Pako New-road',
-                ],
-                citizenCode: {
-                    roll: 1223,
-                },
-            },
-        },
-        {
-            clientId: undefined,
-            country: null,
-            district: 100,
-            streets: [],
-            locations: [],
-            clientInfo: {
-                userName: '',
-                userLocations: [],
-                citizenCode: {
-                    roll: 1223,
-                },
-            },
-        },
-        {
-            clientId: '311Q',
-            country: null,
-            district: 100,
-            streets: [],
-            locations: [],
-            clientInfo: {
-                userName: '',
-                userLocations: [],
-                citizenCode: {
-                    roll: 1223,
-                },
-            },
-        },
-    ],
-};
-
-const newDifferentialData: PartialForm<FormType> = {
-    name: 'Joe',
-    familyName: '',
-    password: 'admin123',
-    confirmPassword: 'admin123',
-    email: 'priyesh@togglecorp.com',
-    address: 'Kalanki',
-    startDate: 100,
-    endDate: 110,
-    permanentAddress: 'Pokhara',
-    countryDistrict: [
-        {
-            clientId: '301A',
-            country: 16,
-            district: 100,
-            streets: [
-                'house 1',
-                'house 2',
-            ],
-            locations: [
-                'locate 1',
-                'locate 2',
-            ],
-            clientInfo: {
-                userName: 'Jimmy',
-                userAddress: 'New Road',
-                userLocations: [
-                    'Teku',
-                    'Pako New-road',
-                ],
-                citizenCode: {
-                    roll: 1223,
-                },
-            },
-        },
-        {
-            clientId: undefined,
-            country: null,
-            district: 100,
-            streets: [],
-            locations: [],
-            clientInfo: {
-                userName: '',
-                userLocations: [],
-                citizenCode: {
-                    roll: 1223,
-                },
-            },
-        },
-        {
-            clientId: '311Q',
-            country: null,
-            district: 100,
-            streets: [],
-            locations: [],
-            clientInfo: {
-                userName: '',
-                userLocations: [],
-                citizenCode: {
-                    roll: 1223,
-                },
-            },
-        },
-    ],
-};
-
 test('Test accumulateValues', () => {
+    const formTypeSchema: FormSchema = {
+        fields: (): FormSchemaFields => ({
+            name: [],
+            email: [],
+            familyName: [requiredCondition],
+            address: [],
+            countryDistrict: {
+                keySelector: (c) => c.clientId as string,
+                member: () => ({
+                    fields: () => ({
+                        clientId: [forceUndefinedType],
+                        country: [forceNullType],
+                        district: [],
+                        streets: [forceEmptyArrayType],
+                        locations: [],
+                        clientInfo: {
+                            fields: () => ({
+                                userName: [],
+                                userAddress: [defaultUndefinedType],
+                                userLocations: [defaultEmptyArrayType],
+                                citizenCode: {
+                                    fields: () => ({
+                                        roll: [],
+                                    }),
+                                },
+                            }),
+                        },
+                    }),
+                }),
+            },
+        }),
+    };
+
+    const data: PartialForm<FormType> = {
+        name: 'Priyesh',
+        familyName: '',
+        email: 'priyesh@togglecorp.com',
+        address: 'Kalanki',
+        countryDistrict: [
+            {
+                clientId: '301A',
+                country: 16,
+                district: 100,
+                streets: [
+                    'house 1',
+                    'house 2',
+                ],
+                locations: [
+                    'locate 1',
+                    'locate 2',
+                ],
+                clientInfo: {
+                    userName: 'Jimmy',
+                    userAddress: 'New Road',
+                    userLocations: [
+                        'Teku',
+                        'Pako New-road',
+                    ],
+                    citizenCode: {},
+                },
+            },
+            {
+                clientId: undefined,
+                country: null,
+                district: 100,
+                streets: [],
+                locations: [],
+                clientInfo: {
+                    userName: '',
+                    userLocations: [],
+                    citizenCode: {},
+                },
+            },
+            {
+                clientId: '311Q',
+                country: null,
+                district: 100,
+                streets: [],
+                locations: [],
+                clientInfo: {
+                    userName: '',
+                    userLocations: [],
+                    citizenCode: {},
+                },
+            },
+        ],
+    };
+
     expect(
         accumulateValues(
             {},
@@ -519,7 +205,125 @@ test('Test accumulateValues', () => {
     });
 });
 
+const errorFormTypeSchema: FormSchema = {
+    fields: (): FormSchemaFields => ({
+        name: [(name) => {
+            if (name && name.length < 5) {
+                return 'length of name must be greater than 5';
+            }
+            return undefined;
+        }],
+        email: [],
+        familyName: [requiredStringCondition],
+        password: [],
+        confirmPassword: [],
+        address: [],
+        startDate: [],
+        endDate: [(currentEndDate, allValue) => {
+            if (allValue.startDate >= currentEndDate) {
+                return 'End date should be greater than start date';
+            }
+
+            return undefined;
+        }],
+        countryDistrict: {
+            keySelector: (c) => c.clientId as string,
+            member: () => ({
+                fields: () => ({
+                    clientId: [forceUndefinedType],
+                    country: [forceNullType],
+                    district: [],
+                    streets: [forceEmptyArrayType],
+                    locations: [],
+                    clientInfo: {
+                        fields: () => ({
+                            userName: [],
+                            userAddress: [defaultUndefinedType],
+                            userLocations: [defaultEmptyArrayType],
+                            citizenCode: {
+                                fields: () => ({
+                                    roll: [requiredCondition],
+                                }),
+                            },
+                        }),
+                    },
+                }),
+            }),
+        },
+    }),
+    fieldDependencies: () => ({
+        endDate: ['startDate'],
+    }),
+    validation: (value) => {
+        if (value?.password !== value?.confirmPassword) {
+            return 'The passwords do not match.';
+        }
+        return undefined;
+    },
+};
+
 test('Test accumulateErrors', () => {
+    const errorCheckData: PartialForm<FormType> = {
+        name: 'Pri',
+        familyName: '',
+        password: 'admin123',
+        confirmPassword: '123',
+        email: 'priyesh@togglecorp.com',
+        address: 'Kalanki',
+        countryDistrict: [
+            {
+                clientId: '301A',
+                country: 16,
+                district: 100,
+                streets: [
+                    'house 1',
+                    'house 2',
+                ],
+                locations: [
+                    'locate 1',
+                    'locate 2',
+                ],
+                clientInfo: {
+                    userName: 'Jimmy',
+                    userAddress: 'New Road',
+                    userLocations: [
+                        'Teku',
+                        'Pako New-road',
+                    ],
+                    citizenCode: {
+                        roll: 1223,
+                    },
+                },
+            },
+            {
+                clientId: undefined,
+                country: null,
+                district: 100,
+                streets: [],
+                locations: [],
+                clientInfo: {
+                    userName: '',
+                    userLocations: [],
+                    citizenCode: {
+                        roll: 2234,
+                    },
+                },
+            },
+            {
+                clientId: '311Q',
+                country: null,
+                district: 100,
+                streets: [],
+                locations: [],
+                clientInfo: {
+                    userName: '',
+                    userLocations: [],
+                    citizenCode: {},
+                },
+            },
+        ],
+    };
+
     expect(
         accumulateErrors(
             {},
@@ -552,6 +356,202 @@ test('Test accumulateErrors', () => {
 });
 
 test('Test accumulateDifferentialErrors', () => {
+    const oldDifferentialData: PartialForm<FormType> = {
+        name: 'Jimmy',
+        familyName: 'Hopkins',
+        password: 'admin123',
+        confirmPassword: 'admin123',
+        email: 'priyesh@togglecorp.com',
+        address: 'Kalanki',
+        startDate: 100,
+        endDate: 100,
+        countryDistrict: [
+            {
+                clientId: '301A',
+                country: 16,
+                district: 100,
+                streets: [
+                    'house 1',
+                    'house 2',
+                ],
+                locations: [
+                    'locate 1',
+                    'locate 2',
+                ],
+                clientInfo: {
+                    userName: 'Jimmy',
+                    userAddress: 'New Road',
+                    userLocations: [
+                        'Teku',
+                        'Pako New-road',
+                    ],
+                    citizenCode: {
+                        roll: 1223,
+                    },
+                },
+            },
+            {
+                clientId: undefined,
+                country: null,
+                district: 100,
+                streets: [],
+                locations: [],
+                clientInfo: {
+                    userName: '',
+                    userLocations: [],
+                    citizenCode: {
+                        roll: 1223,
+                    },
+                },
+            },
+            {
+                clientId: '311Q',
+                country: null,
+                district: 100,
+                streets: [],
+                locations: [],
+                clientInfo: {
+                    userName: '',
+                    userLocations: [],
+                    citizenCode: {
+                        roll: 1223,
+                    },
+                },
+            },
+        ],
+    };
+
+    const similarDifferentialData: PartialForm<FormType> = {
+        name: 'Jim',
+        familyName: 'Hopkins',
+        password: 'admin123',
+        confirmPassword: 'admin123',
+        email: 'priyesh@togglecorp.com',
+        address: 'Kalanki',
+        startDate: 100,
+        endDate: 100,
+        countryDistrict: [
+            {
+                clientId: '301A',
+                country: 16,
+                district: 100,
+                streets: [
+                    'house 1',
+                    'house 2',
+                ],
+                locations: [
+                    'locate 1',
+                    'locate 2',
+                ],
+                clientInfo: {
+                    userName: 'Jimmy',
+                    userAddress: 'New Road',
+                    userLocations: [
+                        'Teku',
+                        'Pako New-road',
+                    ],
+                    citizenCode: {
+                        roll: 1223,
+                    },
+                },
+            },
+            {
+                clientId: undefined,
+                country: null,
+                district: 100,
+                streets: [],
+                locations: [],
+                clientInfo: {
+                    userName: '',
+                    userLocations: [],
+                    citizenCode: {
+                        roll: 1223,
+                    },
+                },
+            },
+            {
+                clientId: '311Q',
+                country: null,
+                district: 100,
+                streets: [],
+                locations: [],
+                clientInfo: {
+                    userName: '',
+                    userLocations: [],
+                    citizenCode: {
+                        roll: 1223,
+                    },
+                },
+            },
+        ],
+    };
+
+    const newDifferentialData: PartialForm<FormType> = {
+        name: 'Joe',
+        familyName: '',
+        password: 'admin123',
+        confirmPassword: 'admin123',
+        email: 'priyesh@togglecorp.com',
+        address: 'Kalanki',
+        startDate: 100,
+        endDate: 110,
+        permanentAddress: 'Pokhara',
+        countryDistrict: [
+            {
+                clientId: '301A',
+                country: 16,
+                district: 100,
+                streets: [
+                    'house 1',
+                    'house 2',
+                ],
+                locations: [
+                    'locate 1',
+                    'locate 2',
+                ],
+                clientInfo: {
+                    userName: 'Jimmy',
+                    userAddress: 'New Road',
+                    userLocations: [
+                        'Teku',
+                        'Pako New-road',
+                    ],
+                    citizenCode: {
+                        roll: 1223,
+                    },
+                },
+            },
+            {
+                clientId: undefined,
+                country: null,
+                district: 100,
+                streets: [],
+                locations: [],
+                clientInfo: {
+                    userName: '',
+                    userLocations: [],
+                    citizenCode: {
+                        roll: 1223,
+                    },
+                },
+            },
+            {
+                clientId: '311Q',
+                country: null,
+                district: 100,
+                streets: [],
+                locations: [],
+                clientInfo: {
+                    userName: '',
+                    userLocations: [],
+                    citizenCode: {
+                        roll: 1223,
+                    },
+                },
+            },
+        ],
+    };
+
     const oldErrors = accumulateErrors(
         oldDifferentialData,
         errorFormTypeSchema,
@@ -628,8 +628,8 @@ test('Test accumulateDifferentialErrors', () => {
 test('Test analyzeErrors', () => {
     expect(analyzeErrors(null)).toBe(false);
     expect(analyzeErrors('This is required')).toBe(true);
-    expect(analyzeErrors('error'[internal])).toBe(false);
     expect(analyzeErrors({})).toBe(false);
+    expect(analyzeErrors({ [internal]: 'This is required' })).toBe(true);
     expect(analyzeErrors({
         fieldOne: 'There is an error',
         fieldTwo: 'There is an error',
@@ -637,6 +637,16 @@ test('Test analyzeErrors', () => {
     expect(analyzeErrors({
         fieldOne: 'There is an error',
         fieldTwo: null,
+    })).toBe(true);
+    expect(analyzeErrors({
+        fieldOne: undefined,
+        fieldTwo: {},
+    })).toBe(false);
+    expect(analyzeErrors({
+        fieldOne: undefined,
+        fieldTwo: {
+            [internal]: 'This is required',
+        },
     })).toBe(true);
     expect(analyzeErrors({
         fieldOne: undefined,
