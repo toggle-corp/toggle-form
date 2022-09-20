@@ -1,6 +1,6 @@
 {
     "name": "@togglecorp/toggle-form",
-    "version": "1.3.0-beta.1",
+    "version": "1.3.0-beta.2",
     "description": "React form library by Togglecorp",
     "files": [
         "/build"
