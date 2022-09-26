@@ -1,5 +1,7 @@
 export const internal = Symbol('Internal Error');
 
+export const dependencies = Symbol('Field Dependency');
+
 type Intersects<A, B> = A extends B ? true : never;
 
 export type Maybe<T> = T | undefined | null;

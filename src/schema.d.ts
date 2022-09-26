@@ -1,81 +1,117 @@
-import { internal } from './types';
+import { internal, dependencies } from './types';
 
-export type Schema<T, V = T, C = undefined> = (
-    Exclude<T, undefined> extends unknown[]
-        ? ArraySchema<Exclude<T, undefined>[number], V, C> | LiteralSchema<T, V, C>
+export type Schema<Value, TopValue = Value, Context = undefined> = (
+    Exclude<Value, undefined> extends unknown[]
+        ? ArraySchema<Exclude<Value, undefined>[number], TopValue, Context>
+            | LiteralSchema<Value, TopValue, Context>
         : (
             // eslint-disable-next-line @typescript-eslint/ban-types
-            Exclude<T, undefined> extends object
-                ? ObjectSchema<Exclude<T, undefined>, V, C> | LiteralSchema<T, V, C>
-                : LiteralSchema<T, V, C>
+            Exclude<Value, undefined> extends object
+                ? ObjectSchema<Exclude<Value, undefined>, TopValue, Context>
+                    | LiteralSchema<Value, TopValue, Context>
+                : LiteralSchema<Value, TopValue, Context>
           )
 );
 
-export type LiteralSchema<T, V = T, C = undefined> = (
-    (value: T, baseValue: V, context: C) => string | undefined
+export type LiteralSchema<Value, TopValue = Value, Context = undefined> = (
+    (value: Value, baseValue: TopValue, context: Context) => string | undefined
 )[];
 
-export type ArraySchema<T, V = T, C = undefined> = {
-    validation?: (value: T[] | undefined, allValue: V, context: C) => string | undefined;
-    member: (value: T, allValue: V, context: C) => Schema<T, V, C>;
-    keySelector: (value: T) => string | number;
+export type ArraySchema<Value, TopValue = Value, Context = undefined> = {
+    validation?: (
+        value: Value[] | undefined,
+        topValue: TopValue,
+        context: Context,
+    ) => string | undefined;
+    member: (
+        value: Value,
+        topValue: TopValue,
+        context: Context,
+    ) => Schema<Value, TopValue, Context>;
+    keySelector: (value: Value) => string | number;
 }
 
-export type ObjectSchema<T, V = T, C = undefined> = {
-    validation?: (value: T | undefined, allValue: V, context: C) => string | undefined;
-    fields: (value: T | undefined, allValue: V, context: C) => (
-        { [K in keyof T]: Schema<T[K], V, C> }
+export type ObjectSchema<Value, TopValue = Value, Context = undefined> = {
+    validation?: (
+        value: Value | undefined,
+        topValue: TopValue,
+        context: Context,
+    ) => string | undefined;
+    fields: (
+        value: Value | undefined,
+        topValue: TopValue,
+        context: Context,
+    ) => (
+        {
+            [K in keyof Value]: Schema<Value[K], TopValue, Context>;
+        } & {
+            [dependencies]?: { [K in keyof Value]: (keyof Value)[] };
+        }
     );
-    fieldDependencies?: (value: T | undefined) => ({ [K in keyof T]: (keyof T)[]});
 }
 
-export type Error<T> = (
-    Exclude<T, undefined> extends unknown[]
-        ? ArrayError<Exclude<T, undefined>[number]> | LeafError
+export type Error<Value> = (
+    Exclude<Value, undefined> extends unknown[]
+        ? ArrayError<Exclude<Value, undefined>[number]> | LeafError
         : (
             // eslint-disable-next-line @typescript-eslint/ban-types
-            Exclude<T, undefined> extends object
-                ? ObjectError<Exclude<T, undefined>> | LeafError
+            Exclude<Value, undefined> extends object
+                ? ObjectError<Exclude<Value, undefined>> | LeafError
                 : LeafError
         )
 );
 
 export type LeafError = string | undefined;
 
-export type ArrayError<T> = {
-    [key: string]: Error<T> | undefined;
+export type ArrayError<Value> = {
+    [key: string]: Error<Value> | undefined;
 } & { [internal]?: string };
 
-export type ObjectError<T> = {
-    [K in keyof T]?: Error<T[K]> | undefined;
+export type ObjectError<Value> = {
+    [K in keyof Value]?: Error<Value[K]> | undefined;
 } & { [internal]?: string }
 
-export function accumulateValues<T, C>(
-    obj: T,
-    schema: Schema<T, T, C>,
+export function accumulateValues<Value, Context>(
+    obj: Value,
+    schema: Schema<Value, Value, Context>,
     settings?: { nullable: boolean },
-    baseValue: T,
-    context: C,
-): T;
+    baseValue: Value,
+    context: Context,
+): Value;
 
-export function accumulateErrors<T, C>(
-    obj: T,
-    schema: Schema<T, T, C>,
-    baseValue: T,
-    context: C,
-): Error<T> | undefined;
+export function accumulateErrors<Value, Context>(
+    obj: Value,
+    schema: Schema<Value, Value, Context>,
+    baseValue: Value,
+    context: Context,
+): Error<Value> | undefined;
 
-export function accumulateDifferentialErrors<T, C>(
-    oldObj: T,
-    newObj: T,
-    oldError: Error<T> | undefined,
-    schema: Schema<T, T, C>,
-    baseValue: T,
+export function accumulateDifferentialErrors<Value, Context>(
+    oldObj: Value,
+    newObj: Value,
+    oldError: Error<Value> | undefined,
+    schema: Schema<Value, Value, Context>,
+    baseValue: Value,
     // FIXME: move this below context
     force = false,
-    context: C,
-): Error<T> | undefined;
+    context: Context,
+): Error<Value> | undefined;
 
-export function analyzeErrors<T>(
-    errors: ArrayError<T> | ObjectError<T> | LeafError
+export function analyzeErrors<Value>(
+    errors: ArrayError<Value> | ObjectError<Value> | LeafError
 ): boolean;
+
+export function addCondition<
+    Value,
+    Sk extends { [K in keyof Value ]: Schema<Value[K], any, any> },
+    DepKey extends NonNullable<Value>,
+    ValKey extends NonNullable<Value>,
+>(
+    schema: Sk,
+    value: Value,
+    keys: readonly DepKey[],
+    values: readonly ValKey[],
+    updater: (
+        val: Value extends null | undefined ? null | undefined : Pick<Value, DepKey>,
+    ) => Pick<Sk, ValKey>,
+): Sk;

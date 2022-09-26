@@ -29,7 +29,6 @@
         "rootDir": "./src",
         "sourceMap": true,
         "baseUrl": ".",
-        "paths": {}
     },
     "exclude": ["node_modules", "build", "coverage", "**/*.test.ts"],
     "include": ["./src/index.ts", "./src/stories", "./src/declarations"]

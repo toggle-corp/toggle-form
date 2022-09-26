@@ -10,6 +10,7 @@ import useForm from '../form';
 import { createSubmitHandler } from '../submissionHelper';
 import type { PartialForm } from '../types';
 import { internal } from '../types';
+import { addCondition } from '../schema';
 import type { ObjectSchema } from '../schema';
 import FormContainer from './FormContainer';
 import { getErrorObject } from '../errorAccessHelper';
@@ -31,23 +32,28 @@ type FormSchemaFields = ReturnType<FormSchema['fields']>;
 
 const schema: FormSchema = {
     fields: (value): FormSchemaFields => {
-        let baseSchema: FormSchemaFields = {
+        const baseSchema: FormSchemaFields = {
             firstName: [requiredStringCondition],
             lastName: [],
             detailed: [],
-            job: [forceNullType],
-            age: [forceNullType],
-            address: [forceNullType],
         };
-        if (value?.detailed) {
-            baseSchema = {
-                ...baseSchema,
+
+        const newSchema = addCondition(
+            baseSchema,
+            value,
+            ['detailed'] as const,
+            ['job', 'age', 'address'] as const,
+            (props) => (props?.detailed ? {
                 job: [],
                 age: [requiredCondition],
                 address: [requiredStringCondition],
-            };
-        }
-        return baseSchema;
+            } : {
+                job: [forceNullType],
+                age: [forceNullType],
+                address: [forceNullType],
+            }),
+        );
+        return newSchema;
     },
 };
 

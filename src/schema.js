@@ -5,8 +5,11 @@ import {
     isTruthy,
     findDifferenceInList,
     isNotDefined,
+    pick,
+    unique,
+    listToMap,
 } from '@togglecorp/fujs';
-import { internal } from './types';
+import { internal, dependencies } from './types';
 import {
     forceNullType,
     forceUndefinedType,
@@ -22,13 +25,13 @@ import {
 
 const emptyArray = [];
 
-export const accumulateValues = (
+export function accumulateValues(
     obj,
     schema,
     settings = {},
     baseValue = obj,
     context,
-) => {
+) {
     const {
         nullable = false,
         /*
@@ -114,14 +117,14 @@ export const accumulateValues = (
 
     console.error('Accumulate Value: Schema is invalid for ', schema);
     return undefined;
-};
+}
 
-export const accumulateErrors = (
+export function accumulateErrors(
     obj,
     schema,
     baseValue = obj,
     context = undefined,
-) => {
+) {
     const {
         member,
         fields,
@@ -184,9 +187,9 @@ export const accumulateErrors = (
 
     console.error('Accumulate Error: Schema is invalid for ', schema);
     return undefined;
-};
+}
 
-export const accumulateDifferentialErrors = (
+export function accumulateDifferentialErrors(
     oldObj,
     newObj,
     oldError,
@@ -198,7 +201,7 @@ export const accumulateDifferentialErrors = (
     // and the new error is calculated
     forced = false,
     context = undefined,
-) => {
+) {
     if (!forced && oldObj === newObj) {
         return oldError;
     }
@@ -208,7 +211,6 @@ export const accumulateDifferentialErrors = (
         fields,
         validation,
         keySelector,
-        fieldDependencies,
     } = schema;
     const isSchemaForLeaf = isList(schema);
     const isSchemaForArray = !!member && !!keySelector;
@@ -269,14 +271,32 @@ export const accumulateDifferentialErrors = (
     }
 
     if (isSchemaForObject) {
-        const dependencies = fieldDependencies ? fieldDependencies() : undefined;
         const hasDepsChanged = (deps) => deps?.some(
             (key) => oldObj?.[key] !== newObj?.[key],
         ) ?? false;
 
         const localFields = fields(newObj, baseValue, context);
+        const dependenciesObj = localFields[dependencies];
         Object.keys(localFields).forEach((fieldName) => {
-            const depsChanged = hasDepsChanged(dependencies?.[fieldName]);
+            const depsChanged = hasDepsChanged(dependenciesObj?.[fieldName]);
+
+            /*
+            // FIXME: should we just skip required condition when deps have changed?
+
+            // NOTE: when deps have changed
+            if (depsChanged) {
+                // This clears error
+                return;
+            }
+
+            // NOTE: when field has not changed and deps have not changed
+            if (oldObj?.[fieldName] === newObj?.[fieldName]) {
+                if (oldError?.[fieldName]) {
+                    errors[fieldName] = oldError?.[fieldName];
+                }
+                return;
+            }
+            */
 
             if (oldObj?.[fieldName] === newObj?.[fieldName] && !depsChanged) {
                 if (oldError?.[fieldName]) {
@@ -305,9 +325,9 @@ export const accumulateDifferentialErrors = (
 
     console.error('Accumulate Differential Error: Schema is invalid for ', schema);
     return undefined;
-};
+}
 
-export const analyzeErrors = (errors) => {
+export function analyzeErrors(errors) {
     // handles undefined, null
     if (isFalsy(errors)) {
         return false;
@@ -333,4 +353,33 @@ export const analyzeErrors = (errors) => {
         // handles string or array of strings
         return isTruthy(subErrors);
     });
-};
+}
+
+export function addCondition(
+    schema,
+    value,
+    dependentKeys,
+    valueKeys,
+    updater,
+) {
+    const pickedValues = value
+        ? pick(value, dependentKeys)
+        : undefined;
+    const prevFieldDependencies = schema[dependencies] ?? {};
+    return {
+        ...schema,
+        ...pick(updater(pickedValues), valueKeys),
+        [dependencies]: {
+            ...prevFieldDependencies,
+
+            ...listToMap(
+                valueKeys,
+                (key) => key,
+                (key) => unique([
+                    ...(prevFieldDependencies[key] ?? []),
+                    ...dependentKeys,
+                ]),
+            ),
+        },
+    };
+}

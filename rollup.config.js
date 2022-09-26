@@ -15,7 +15,8 @@ const PLUGINS = [
         include: ['**/*.jsx', '**/*.js', '**/*.ts', '**/*.tsx'],
     }),
     babel({
-        babelHelpers: 'runtime',
+        // babelHelpers: 'runtime',
+        babelHelpers: 'bundled',
         exclude: 'node_modules/**',
         extensions: ['.jsx', '.js', '.ts', '.tsx'],
     }),
@@ -27,27 +28,28 @@ const PLUGINS = [
     filesize(),
     copy({
         targets: [
-            { src: ['src/schema.d.ts', 'src/nullHelper.d.ts'], dest: 'build' },
+            { src: ['src/schema.d.ts', 'src/nullHelper.d.ts'], dest: 'build/esm' },
         ],
     }),
 ];
 
 const OUTPUT_DATA = [
     {
-        file: pkg.main,
+        dir: 'build/cjs',
         format: 'cjs',
     },
     {
-        file: pkg.module,
-        format: 'es',
+        dir: 'build/esm',
+        format: 'esm',
+        preserveModules: true,
+        preserveModulesRoot: 'src',
     },
 ];
 
-const config = OUTPUT_DATA.map(({ file, format }) => ({
+const config = OUTPUT_DATA.map((options) => ({
     input: INPUT_FILE_PATH,
     output: {
-        file,
-        format,
+        ...options,
         sourcemap: true,
         exports: 'named',
     },

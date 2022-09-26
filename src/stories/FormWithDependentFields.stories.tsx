@@ -1,5 +1,4 @@
 import React, { useCallback } from 'react';
-import { isDefined } from '@togglecorp/fujs';
 import {
     Button,
     TextInput,
@@ -10,9 +9,11 @@ import useForm from '../form';
 import { createSubmitHandler } from '../submissionHelper';
 import type { ObjectSchema } from '../schema';
 import { internal } from '../types';
+import { addCondition } from '../schema';
 import type { PartialForm } from '../types';
 import FormContainer from './FormContainer';
 import { getErrorObject } from '../errorAccessHelper';
+import { requiredStringCondition } from '../validation';
 
 type FormType = {
     firstName: string;
@@ -26,27 +27,26 @@ type PartForm = PartialForm<FormType>;
 type FormSchema = ObjectSchema<PartForm>
 type FormSchemaFields = ReturnType<FormSchema['fields']>;
 
-function requiredWithBirthDateCondition(
-    birthPlace: string | undefined,
-    value: PartialForm<FormType>,
-) {
-    if (isDefined(value.birthDate) && !isDefined(birthPlace)) {
-        return 'Birth place is required when birth date is entered';
-    }
-
-    return undefined;
-}
-
 const schema: FormSchema = {
-    fields: (): FormSchemaFields => ({
-        firstName: [],
-        lastName: [],
-        birthDate: [],
-        birthPlace: [requiredWithBirthDateCondition],
-    }),
-    fieldDependencies: () => ({
-        birthPlace: ['birthDate'],
-    }),
+    fields: (value): FormSchemaFields => {
+        const baseSchema: FormSchemaFields = {
+            firstName: [],
+            lastName: [],
+            birthDate: [],
+        };
+        const newSchema = addCondition(
+            baseSchema,
+            value,
+            ['birthDate'] as const,
+            ['birthPlace'] as const,
+            (props) => (props?.birthDate ? {
+                birthPlace: [requiredStringCondition],
+            } : {
+                birthPlace: [],
+            }),
+        );
+        return newSchema;
+    },
 };
 
 const defaultFormValues: PartialForm<FormType> = {

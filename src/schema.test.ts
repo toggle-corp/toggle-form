@@ -3,6 +3,7 @@ import {
     accumulateErrors,
     analyzeErrors,
     accumulateDifferentialErrors,
+    addCondition,
 } from './schema';
 import type { ObjectSchema } from './schema';
 import {
@@ -17,6 +18,7 @@ import {
     forceUndefinedType,
     requiredCondition,
     requiredStringCondition,
+    lessThanOrEqualToCondition,
 } from './validation';
 
 interface CountryDistrict {
@@ -206,54 +208,64 @@ test('Test accumulateValues', () => {
 });
 
 const errorFormTypeSchema: FormSchema = {
-    fields: (): FormSchemaFields => ({
-        name: [(name) => {
-            if (name && name.length < 5) {
-                return 'length of name must be greater than 5';
-            }
-            return undefined;
-        }],
-        email: [],
-        familyName: [requiredStringCondition],
-        password: [],
-        confirmPassword: [],
-        address: [],
-        startDate: [],
-        endDate: [(currentEndDate, allValue) => {
-            if (allValue.startDate >= currentEndDate) {
-                return 'End date should be greater than start date';
-            }
+    fields: (value): FormSchemaFields => {
+        const fields: FormSchemaFields = {
+            name: [(name) => {
+                if (name && name.length < 5) {
+                    return 'length of name must be greater than 5';
+                }
+                return undefined;
+            }],
+            email: [],
+            familyName: [requiredStringCondition],
+            password: [],
+            confirmPassword: [],
+            address: [],
+            startDate: [],
+            endDate: [(currentEndDate, allValue) => {
+                if (allValue.startDate >= currentEndDate) {
+                    return 'End date should be greater than start date';
+                }
 
-            return undefined;
-        }],
-        countryDistrict: {
-            keySelector: (c) => c.clientId as string,
-            member: () => ({
-                fields: () => ({
-                    clientId: [forceUndefinedType],
-                    country: [forceNullType],
-                    district: [],
-                    streets: [forceEmptyArrayType],
-                    locations: [],
-                    clientInfo: {
-                        fields: () => ({
-                            userName: [],
-                            userAddress: [defaultUndefinedType],
-                            userLocations: [defaultEmptyArrayType],
-                            citizenCode: {
-                                fields: () => ({
-                                    roll: [requiredCondition],
-                                }),
-                            },
-                        }),
-                    },
+                return undefined;
+            }],
+            countryDistrict: {
+                keySelector: (c) => c.clientId as string,
+                member: () => ({
+                    fields: () => ({
+                        clientId: [forceUndefinedType],
+                        country: [forceNullType],
+                        district: [],
+                        streets: [forceEmptyArrayType],
+                        locations: [],
+                        clientInfo: {
+                            fields: () => ({
+                                userName: [],
+                                userAddress: [defaultUndefinedType],
+                                userLocations: [defaultEmptyArrayType],
+                                citizenCode: {
+                                    fields: () => ({
+                                        roll: [requiredCondition],
+                                    }),
+                                },
+                            }),
+                        },
+                    }),
                 }),
+            },
+        };
+        return addCondition(
+            fields,
+            value,
+            ['startDate'] as const,
+            ['endDate'] as const,
+            (v) => (v?.startDate ? {
+                endDate: [lessThanOrEqualToCondition(v.startDate)],
+            } : {
+                endDate: [],
             }),
-        },
-    }),
-    fieldDependencies: () => ({
-        endDate: ['startDate'],
-    }),
+        );
+    },
     validation: (value) => {
         if (value?.password !== value?.confirmPassword) {
             return 'The passwords do not match.';
