@@ -1,0 +1,46 @@
+.equi-row {
+    display: flex;
+    align-items: center;
+    gap: var(--tui-spacing-medium);
+
+    >* {
+        flex-grow: 1;
+    }
+}
+
+.row {
+    display: flex;
+    align-items: center;
+
+    >:first-child {
+        flex-grow: 1;
+    }
+
+    >:not(&:first-child) {
+        flex-shrink: 0;
+    }
+}
+
+.container {
+    display: flex;
+    overflow: auto;
+    gap: var(--tui-spacing-large);
+
+    >* {
+        flex-basis: 0;
+        flex-grow: 1;
+    }
+
+    form {
+        display: flex;
+        flex-direction: column;
+        overflow: auto;
+        gap: var(--tui-spacing-medium);
+    }
+
+    .code-block {
+        background-color: var(--tui-color-background-input-section-light);
+        padding: var(--tui-spacing-medium);
+        overflow: auto;
+    }
+}
