@@ -12,7 +12,7 @@ import { internal } from '../types';
 import type { ObjectSchema } from '../schema';
 import FormContainer from './FormContainer';
 import { getErrorObject } from '../errorAccessHelper';
-import { requiredStringCondition, requiredCondition, forceNullType } from '../validation';
+import { requiredStringCondition, requiredCondition } from '../validation';
 
 type FormType = {
     step: number;
@@ -25,27 +25,29 @@ type FormType = {
     address?: string;
 };
 
-type FormSchema = ObjectSchema<PartialForm<FormType>>
+type PartForm = PartialForm<FormType>;
+type FormSchema = ObjectSchema<PartForm, PartForm, number>
 type FormSchemaFields = ReturnType<FormSchema['fields']>;
 
 const schema: FormSchema = {
-    fields: (value): FormSchemaFields => {
+    fields: (_, __, step): FormSchemaFields => {
         let baseSchema: FormSchemaFields = {
-            step: [],
-            firstName: [forceNullType],
-            lastName: [forceNullType],
-            job: [forceNullType],
-            age: [forceNullType],
-            address: [forceNullType],
+            firstName: [],
+            lastName: [],
+            job: [],
+            age: [],
+            address: [],
         };
-        if (value?.step === 1) {
+
+        if (step >= 1) {
             baseSchema = {
                 ...baseSchema,
                 firstName: [requiredStringCondition],
                 lastName: [],
             };
         }
-        if (value?.step === 2) {
+
+        if (step === 2) {
             baseSchema = {
                 ...baseSchema,
                 job: [requiredStringCondition],
@@ -53,15 +55,16 @@ const schema: FormSchema = {
                 address: [],
             };
         }
+
         return baseSchema;
     },
 };
 
 const defaultFormValues: PartialForm<FormType> = {
-    step: 1,
 };
 
 export const Default = () => {
+    const [step, setStep] = React.useState(1);
     const {
         pristine,
         value,
@@ -70,16 +73,16 @@ export const Default = () => {
         validate,
         setError,
         setValue,
-    } = useForm(schema, defaultFormValues);
+    } = useForm(schema, { value: defaultFormValues }, step);
 
     const handleSubmit = useCallback(
         (finalValues: PartialForm<FormType>) => {
-            if (finalValues.step === 1) {
-                setValue((val) => ({ ...val, step: 2 }));
+            if (step === 1) {
+                setStep(2);
             } else {
                 setValue(finalValues);
             }
-        }, [setValue],
+        }, [step, setValue],
     );
 
     const error = getErrorObject(riskyError);
@@ -92,7 +95,7 @@ export const Default = () => {
                 <p>
                     {error?.[internal]}
                 </p>
-                {value.step === 1 && (
+                {step === 1 && (
                     <>
                         <TextInput
                             label="First Name *"
@@ -110,10 +113,10 @@ export const Default = () => {
                         />
                     </>
                 )}
-                {value.step === 2 && (
+                {step === 2 && (
                     <>
                         <TextInput
-                            label="Address *"
+                            label="Address"
                             name="address"
                             value={value.address}
                             onChange={setFieldValue}
@@ -127,7 +130,7 @@ export const Default = () => {
                             error={error?.age}
                         />
                         <TextInput
-                            label="Job"
+                            label="Job*"
                             name="job"
                             value={value.job}
                             onChange={setFieldValue}
@@ -141,7 +144,7 @@ export const Default = () => {
                     variant="primary"
                     disabled={pristine}
                 >
-                    Submit
+                    {step === 1 ? 'Next' : 'Submit'}
                 </Button>
             </form>
         </FormContainer>

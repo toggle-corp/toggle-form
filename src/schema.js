@@ -9,6 +9,7 @@ import {
 import { internal } from './types';
 import {
     forceNullType,
+    forceUndefinedType,
     forceEmptyArrayType,
 
     defaultUndefinedType,
@@ -21,7 +22,13 @@ import {
 
 const emptyArray = [];
 
-export const accumulateValues = (obj, schema, settings = {}) => {
+export const accumulateValues = (
+    obj,
+    schema,
+    settings = {},
+    baseValue = obj,
+    context,
+) => {
     const {
         nullable = false,
         /*
@@ -44,6 +51,9 @@ export const accumulateValues = (obj, schema, settings = {}) => {
         if (schema.includes(forceNullType)) {
             return null;
         }
+        if (schema.includes(forceUndefinedType)) {
+            return undefined;
+        }
         if (schema.includes(forceEmptyArrayType)) {
             return [];
         }
@@ -63,8 +73,14 @@ export const accumulateValues = (obj, schema, settings = {}) => {
         const values = [];
         if (obj) {
             obj.forEach((element) => {
-                const localMember = member(element);
-                const value = accumulateValues(element, localMember, settings);
+                const localMember = member(element, baseValue, context);
+                const value = accumulateValues(
+                    element,
+                    localMember,
+                    settings,
+                    baseValue,
+                    context,
+                );
                 values.push(value);
             });
         }
@@ -77,9 +93,15 @@ export const accumulateValues = (obj, schema, settings = {}) => {
     }
     if (isSchemaForObject) {
         const values = {};
-        const localFields = fields(obj);
+        const localFields = fields(obj, baseValue, context);
         Object.keys(localFields).forEach((fieldName) => {
-            const value = accumulateValues(obj?.[fieldName], localFields[fieldName], settings);
+            const value = accumulateValues(
+                obj?.[fieldName],
+                localFields[fieldName],
+                settings,
+                baseValue,
+                context,
+            );
             if (value !== undefined) {
                 values[fieldName] = value;
             }
@@ -94,7 +116,12 @@ export const accumulateValues = (obj, schema, settings = {}) => {
     return undefined;
 };
 
-export const accumulateErrors = (obj, schema, baseValue = obj) => {
+export const accumulateErrors = (
+    obj,
+    schema,
+    baseValue = obj,
+    context = undefined,
+) => {
     const {
         member,
         fields,
@@ -108,7 +135,7 @@ export const accumulateErrors = (obj, schema, baseValue = obj) => {
     if (isSchemaForLeaf) {
         let error;
         schema.every((rule) => {
-            const message = rule(obj, baseValue);
+            const message = rule(obj, baseValue, context);
             if (message) {
                 error = message;
             }
@@ -119,7 +146,7 @@ export const accumulateErrors = (obj, schema, baseValue = obj) => {
 
     const errors = {};
     if (validation) {
-        const validationErrors = validation(obj);
+        const validationErrors = validation(obj, baseValue, context);
         if (validationErrors) {
             errors[internal] = validationErrors;
         }
@@ -128,8 +155,8 @@ export const accumulateErrors = (obj, schema, baseValue = obj) => {
     if (isSchemaForArray) {
         if (obj) {
             obj.forEach((element) => {
-                const localMember = member(element);
-                const fieldError = accumulateErrors(element, localMember, baseValue);
+                const localMember = member(element, baseValue, context);
+                const fieldError = accumulateErrors(element, localMember, baseValue, context);
                 if (fieldError) {
                     const index = keySelector(element);
                     errors[index] = fieldError;
@@ -140,12 +167,13 @@ export const accumulateErrors = (obj, schema, baseValue = obj) => {
     }
 
     if (isSchemaForObject) {
-        const localFields = fields(obj);
+        const localFields = fields(obj, baseValue, context);
         Object.keys(localFields).forEach((fieldName) => {
             const fieldError = accumulateErrors(
                 obj?.[fieldName],
                 localFields[fieldName],
                 baseValue,
+                context,
             );
             if (fieldError) {
                 errors[fieldName] = fieldError;
@@ -169,6 +197,7 @@ export const accumulateDifferentialErrors = (
     // so, forced is used when the dependencies have changed
     // and the new error is calculated
     forced = false,
+    context = undefined,
 ) => {
     if (!forced && oldObj === newObj) {
         return oldError;
@@ -188,7 +217,7 @@ export const accumulateDifferentialErrors = (
     if (isSchemaForLeaf) {
         let error;
         schema.every((rule) => {
-            const message = rule(newObj, baseValue);
+            const message = rule(newObj, baseValue, context);
             if (message) {
                 error = message;
             }
@@ -199,7 +228,7 @@ export const accumulateDifferentialErrors = (
 
     const errors = {};
     if (validation) {
-        const validationErrors = validation(newObj);
+        const validationErrors = validation(newObj, baseValue, context);
         if (validationErrors) {
             errors[internal] = validationErrors;
         }
@@ -227,6 +256,8 @@ export const accumulateDifferentialErrors = (
                 oldError?.[index],
                 localMember,
                 baseValue,
+                false,
+                context,
             );
 
             if (fieldError) {
@@ -243,7 +274,7 @@ export const accumulateDifferentialErrors = (
             (key) => oldObj?.[key] !== newObj?.[key],
         ) ?? false;
 
-        const localFields = fields(newObj);
+        const localFields = fields(newObj, baseValue, context);
         Object.keys(localFields).forEach((fieldName) => {
             const depsChanged = hasDepsChanged(dependencies?.[fieldName]);
 
@@ -261,6 +292,7 @@ export const accumulateDifferentialErrors = (
                 localFields[fieldName],
                 baseValue,
                 true,
+                context,
             );
 
             if (fieldError) {

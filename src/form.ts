@@ -39,7 +39,7 @@ interface ErrorAction<T extends object> {
 interface ValueAction<T extends object> {
     type: 'SET_VALUE';
     value: SetBaseValueArg<T>;
-    doNotReset: boolean | undefined;
+    partialUpdate: boolean | undefined;
 }
 interface PristineAction {
     type: 'SET_PRISTINE';
@@ -68,19 +68,22 @@ type State<T> = {
     pristine: boolean,
 } & ({
     hasRestorePoint: true,
-    restorepointValue: T,
-    restorepointError: Error<T> | undefined,
-    restorepointPristine: boolean,
+    restorePointValue: T,
+    restorePointError: Error<T> | undefined,
+    restorePointPristine: boolean,
 } | {
     hasRestorePoint: false,
 });
 
 // eslint-disable-next-line @typescript-eslint/ban-types
 function useForm<T extends object>(
-    schema: Schema<T>,
-    initialFormValue: T,
-    initialPristine = true,
-    initialError?: Error<T>,
+    schema: Schema<T, T, undefined>,
+    initialState: {
+        value: T,
+        error?: Error<T>,
+        pristine?: boolean,
+    },
+    context?: never,
 ): {
     value: T,
     error: Error<T> | undefined,
@@ -89,27 +92,90 @@ function useForm<T extends object>(
 
     setPristine: (pristine: boolean) => void,
     setError: (errors: SetErrorArg<Error<T>> | undefined) => void,
-    setValue: (value: SetBaseValueArg<T>, doNotReset?: boolean) => void,
+    setValue: (value: SetBaseValueArg<T>, partialUpdate?: boolean) => void,
     setFieldValue: (...entries: EntriesAsList<T>) => void,
 
     hasRestorePoint: boolean,
-    restorepointValue: T,
-    restorepointError: Error<T> | undefined,
-    restorepointPristine: boolean,
+    restorePointValue: T,
+    restorePointError: Error<T> | undefined,
+    restorePointPristine: boolean,
+
+    createRestorePoint: () => void;
+    restore: () => void;
+    clearRestorePoint: () => void;
+};
+// eslint-disable-next-line @typescript-eslint/ban-types
+function useForm<T extends object, C>(
+    schema: Schema<T, T, C>,
+    initialState: {
+        value: T,
+        error?: Error<T>,
+        pristine?: boolean,
+    },
+    context: C,
+): {
+    value: T,
+    error: Error<T> | undefined,
+    pristine: boolean,
+    validate: ValidateFunc<T>,
+
+    setPristine: (pristine: boolean) => void,
+    setError: (errors: SetErrorArg<Error<T>> | undefined) => void,
+    setValue: (value: SetBaseValueArg<T>, partialUpdate?: boolean) => void,
+    setFieldValue: (...entries: EntriesAsList<T>) => void,
+
+    hasRestorePoint: boolean,
+    restorePointValue: T,
+    restorePointError: Error<T> | undefined,
+    restorePointPristine: boolean,
+
+    createRestorePoint: () => void;
+    restore: () => void;
+    clearRestorePoint: () => void;
+};
+// eslint-disable-next-line @typescript-eslint/ban-types
+function useForm<T extends object, C>(
+    schema: Schema<T, T, C>,
+    initialState: {
+        value: T,
+        error?: Error<T>,
+        pristine?: boolean,
+    },
+    context: C,
+): {
+    value: T,
+    error: Error<T> | undefined,
+    pristine: boolean,
+    validate: ValidateFunc<T>,
+
+    setPristine: (pristine: boolean) => void,
+    setError: (errors: SetErrorArg<Error<T>> | undefined) => void,
+    setValue: (value: SetBaseValueArg<T>, partialUpdate?: boolean) => void,
+    setFieldValue: (...entries: EntriesAsList<T>) => void,
+
+    hasRestorePoint: boolean,
+    restorePointValue: T,
+    restorePointError: Error<T> | undefined,
+    restorePointPristine: boolean,
 
     createRestorePoint: () => void;
     restore: () => void;
     clearRestorePoint: () => void;
 } {
+    const {
+        value: initialFormValue,
+        error: initialError,
+        pristine: initialPristine = true,
+    } = initialState;
     const formReducer = useCallback(
         (prevState: State<T>, action: Actions<T>): State<T> => {
             if (action.type === 'CREATE_RESTORE_POINT') {
                 return {
                     ...prevState,
                     hasRestorePoint: true,
-                    restorepointValue: prevState.value,
-                    restorepointError: prevState.error,
-                    restorepointPristine: prevState.pristine,
+                    restorePointValue: prevState.value,
+                    restorePointError: prevState.error,
+                    restorePointPristine: prevState.pristine,
                 };
             }
             if (action.type === 'RESTORE_RESTORE_POINT') {
@@ -119,16 +185,16 @@ function useForm<T extends object>(
                 if (action.retain) {
                     return {
                         ...prevState,
-                        value: prevState.restorepointValue,
-                        error: prevState.restorepointError,
-                        pristine: prevState.restorepointPristine,
+                        value: prevState.restorePointValue,
+                        error: prevState.restorePointError,
+                        pristine: prevState.restorePointPristine,
                     };
                 }
                 return {
                     hasRestorePoint: false,
-                    value: prevState.restorepointValue,
-                    error: prevState.restorepointError,
-                    pristine: prevState.restorepointPristine,
+                    value: prevState.restorePointValue,
+                    error: prevState.restorePointError,
+                    pristine: prevState.restorePointPristine,
                 };
             }
             if (action.type === 'CLEAR_RESTORE_POINT') {
@@ -164,14 +230,14 @@ function useForm<T extends object>(
             if (action.type === 'SET_VALUE') {
                 const {
                     value: valueFromAction,
-                    doNotReset,
+                    partialUpdate,
                 } = action;
 
                 const newValue = isBaseCallable(valueFromAction)
                     ? valueFromAction(prevState.value)
                     : valueFromAction;
 
-                if (doNotReset) {
+                if (partialUpdate) {
                     const oldError = prevState.error;
                     const oldValue = prevState.value;
 
@@ -184,6 +250,9 @@ function useForm<T extends object>(
                         newValue,
                         oldError,
                         schema,
+                        newValue,
+                        false,
+                        context,
                     );
 
                     return {
@@ -228,6 +297,9 @@ function useForm<T extends object>(
                     newValue,
                     oldError,
                     schema,
+                    newValue,
+                    false,
+                    context,
                 );
 
                 return {
@@ -240,7 +312,7 @@ function useForm<T extends object>(
             console.error('Action is not supported');
             return prevState;
         },
-        [schema],
+        [schema, context],
     );
 
     const [state, dispatch] = useReducer(
@@ -307,11 +379,11 @@ function useForm<T extends object>(
     );
 
     const setValue = useCallback(
-        (value: SetBaseValueArg<T>, doNotReset: boolean | undefined) => {
+        (value: SetBaseValueArg<T>, partialUpdate: boolean | undefined) => {
             const action: ValueAction<T> = {
                 type: 'SET_VALUE',
                 value,
-                doNotReset,
+                partialUpdate,
             };
             dispatch(action);
         },
@@ -333,19 +405,30 @@ function useForm<T extends object>(
 
     const validate: ValidateFunc<T> = useCallback(
         (accumulateOnError?: boolean) => {
-            const stateErrors = accumulateErrors(state.value, schema);
+            const stateErrors = accumulateErrors(state.value, schema, state.value, context);
             const stateErrored = analyzeErrors(stateErrors);
             if (stateErrored) {
                 const value = accumulateOnError
-                    ? accumulateValues(state.value, schema, { nullable: true })
-                    : undefined;
+                    ? accumulateValues(
+                        state.value,
+                        schema,
+                        { nullable: true },
+                        state.value,
+                        context,
+                    ) : undefined;
                 return { errored: true, error: stateErrors as Error<T>, value };
             }
             // NOTE: server needs `null` to identify that the value is not defined
-            const validatedValues = accumulateValues(state.value, schema, { nullable: true });
+            const validatedValues = accumulateValues(
+                state.value,
+                schema,
+                { nullable: true },
+                state.value,
+                context,
+            );
             return { errored: false, value: validatedValues, error: undefined };
         },
-        [schema, state],
+        [schema, state, context],
     );
 
     return {
@@ -360,9 +443,9 @@ function useForm<T extends object>(
         validate,
 
         hasRestorePoint: state.hasRestorePoint,
-        restorepointValue: state.hasRestorePoint ? state.restorepointValue : state.value,
-        restorepointError: state.hasRestorePoint ? state.restorepointError : state.error,
-        restorepointPristine: state.hasRestorePoint ? state.restorepointPristine : state.pristine,
+        restorePointValue: state.hasRestorePoint ? state.restorePointValue : state.value,
+        restorePointError: state.hasRestorePoint ? state.restorePointError : state.error,
+        restorePointPristine: state.hasRestorePoint ? state.restorePointPristine : state.pristine,
 
         createRestorePoint,
         restore,

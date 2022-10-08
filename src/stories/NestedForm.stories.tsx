@@ -36,7 +36,7 @@ type FormType = {
 };
 type BaseFormType = PartialForm<FormType>;
 
-type FormSchema = ObjectSchema<BaseFormType, BaseFormType>;
+type FormSchema = ObjectSchema<BaseFormType>;
 type FormSchemaFields = ReturnType<FormSchema['fields']>;
 type MetaType = NonNullable<FormType['meta']>;
 type MetaSchema = ObjectSchema<PartialForm<MetaType>, BaseFormType>;
@@ -182,7 +182,7 @@ export const Default = () => {
         validate,
         setError,
         setValue,
-    } = useForm(schema, defaultFormValues);
+    } = useForm(schema, { value: defaultFormValues });
 
     const handleSubmit = useCallback(
         (finalValues: PartialForm<FormType>) => {

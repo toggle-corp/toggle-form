@@ -4,7 +4,7 @@ import { ValidateFunc } from './form';
 // eslint-disable-next-line import/prefer-default-export
 export function createSubmitHandler<T>(
     validator: ValidateFunc<T>,
-    setError: (errors: Error<T> | undefined) => void,
+    setError: (errors: Error<T> | undefined, value: unknown) => void,
     successCallback: (value: T) => void,
     failureCallback?: (value: unknown, errors: Error<T>) => void,
 ) {
@@ -17,12 +17,15 @@ export function createSubmitHandler<T>(
 
         // NOTE: accumulating value if failureCallback is defined
         const value = validator(!!failureCallback);
-        setError(value.error);
         // NOTE: Idk why !value.errored doesn't work here
         if (value.errored === false) {
+            setError(value.error, value.value);
             successCallback(value.value);
-        } else if (failureCallback) {
-            failureCallback(value.value, value.error);
+        } else {
+            setError(value.error, value.value);
+            if (failureCallback) {
+                failureCallback(value.value, value.error);
+            }
         }
     };
 }
