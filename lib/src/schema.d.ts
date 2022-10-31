@@ -88,7 +88,7 @@ export type ObjectError<Value> = {
 export function accumulateValues<Value, Context>(
     obj: Value,
     schema: Schema<Value, Value, Context>,
-    topValue: Value,
+    topValue: Value | undefined,
     context: Context,
     settings?: { nullable: boolean },
 ): Value;
@@ -96,7 +96,7 @@ export function accumulateValues<Value, Context>(
 export function accumulateErrors<Value, Context>(
     obj: Value,
     schema: Schema<Value, Value, Context>,
-    topValue: Value,
+    topValue: Value | undefined,
     context: Context,
 ): Error<Value> | undefined;
 
@@ -105,7 +105,7 @@ export function accumulateDifferentialErrors<Value, Context>(
     newObj: Value,
     oldError: Error<Value> | undefined,
     schema: Schema<Value, Value, Context>,
-    topValue: Value,
+    topValue: Value | undefined,
     context: Context,
     force = false,
 ): Error<Value> | undefined;

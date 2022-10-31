@@ -7,6 +7,7 @@ test('test removeNull condition', () => {
     expect(removeNull({})).toStrictEqual({});
     expect(removeNull([null, null])).toStrictEqual([]);
     expect(removeNull([1, null, 2, undefined, '10'])).toStrictEqual([1, 2, '10']);
+
     expect(removeNull([
         10,
         'tc',
@@ -34,10 +35,32 @@ test('test removeNull condition', () => {
         },
         [12, ''],
     ]);
+
     expect(removeNull({
-        name: null, age: null, roll: undefined, address: '',
-    })).toStrictEqual({ address: '' });
-    expect(removeNull({ name: 'hari', age: null, roll: 2231 })).toStrictEqual({ name: 'hari', roll: 2231 });
+        name: null,
+        age: null,
+        roll: undefined,
+        address: '',
+    })).toStrictEqual({
+        address: '',
+    });
+
+    expect(removeNull({
+        name: 'hari',
+        age: null,
+        roll: 2231,
+    }, ['name'])).toStrictEqual({
+        roll: 2231,
+    });
+
+    expect(removeNull({
+        name: 'hari',
+        age: null,
+        roll: 2231,
+    })).toStrictEqual({
+        name: 'hari',
+        roll: 2231,
+    });
     expect(removeNull({
         name: 'John',
         age: 24,

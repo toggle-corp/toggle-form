@@ -16,6 +16,9 @@ storybook-static/
 .env.test.local
 .env.production.local
 
+# test
+coverage/
+
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*

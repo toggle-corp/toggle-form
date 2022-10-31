@@ -5,6 +5,7 @@ import {
     isLocalUrl,
     isValidUrl,
     isDefined,
+    isCallable,
 } from './utils';
 
 test('test isLocalUrl condition', () => {
@@ -91,4 +92,22 @@ test('test hasNoValues condition', () => {
     expect(hasNoValues(['', null, undefined])).toBe(false);
     expect(hasNoValues([[], [], []])).toBe(false);
     expect(hasNoValues([{}, {}])).toBe(false);
+});
+
+test('test isCallable', () => {
+    expect(isCallable(null)).toBe(false);
+    expect(isCallable(undefined)).toBe(false);
+    expect(isCallable(0)).toBe(false);
+    expect(isCallable('function')).toBe(false);
+    expect(isCallable([])).toBe(false);
+    expect(isCallable({})).toBe(false);
+    expect(isCallable(() => true)).toBe(true);
+    function getTrue() {
+        return true;
+    }
+    expect(isCallable(getTrue)).toBe(true);
+    function noOp() {
+        console.warn('No operation');
+    }
+    expect(isCallable(noOp)).toBe(true);
 });
