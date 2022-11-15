@@ -6,16 +6,16 @@ import {
     Checkbox,
 } from '@togglecorp/toggle-ui';
 
-import useForm from '../../lib/src/form';
-import { createSubmitHandler } from '../../lib/src/submissionHelper';
-import type { PartialForm } from '../../lib/src/types';
-import { nullValue, nonFieldError } from '../../lib/src/types';
-import { addCondition } from '../../lib/src/schema';
-import type { ObjectSchema } from '../../lib/src/schema';
+import useForm from '@togglecorp/toggle-form/src/form';
+import { createSubmitHandler } from '@togglecorp/toggle-form/src/submissionHelper';
+import type { PartialForm } from '@togglecorp/toggle-form/src/types';
+import { nullValue, nonFieldError } from '@togglecorp/toggle-form/src/types';
+import { addCondition } from '@togglecorp/toggle-form/src/schema';
+import type { ObjectSchema } from '@togglecorp/toggle-form/src/schema';
+import { getErrorObject } from '@togglecorp/toggle-form/src/errorAccessHelper';
+import { requiredStringCondition } from '@togglecorp/toggle-form/src/validation';
 import FormContainer from './FormContainer';
 import NonFieldError from './NonFieldError';
-import { getErrorObject } from '../../lib/src/errorAccessHelper';
-import { requiredStringCondition } from '../../lib/src/validation';
 
 type FormType = {
     firstName: string;

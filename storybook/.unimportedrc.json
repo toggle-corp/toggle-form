@@ -1,0 +1,6 @@
+{
+    "entry": ["./stories/**/*.stories.tsx"],
+    "ignorePatterns": ["node_modules/**", "build/**"],
+    "ignoreUnimported": ["**/*.d.ts"],
+    "extensions": [".ts", ".js", ".tsx", ".jsx"]
+}

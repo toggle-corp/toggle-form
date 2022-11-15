@@ -1,13 +1,13 @@
 {
-  "name": "toggle-form-storybook",
+  "name": "@togglecorp/toggle-form-storybook",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
   "scripts": {
     "typecheck": "tsc",
     "lint": "eslint ./stories --report-unused-disable-directives",
+    "check-unused": "unimported",
     "storybook": "NODE_OPTIONS=--openssl-legacy-provider start-storybook -p 6006",
-    "build-storybook": "build-storybook"
+    "storybook:build": "build-storybook"
   },
   "keywords": [],
   "author": "",
@@ -43,8 +43,10 @@
   },
   "dependencies": {
     "@togglecorp/fujs": "^1.9.3",
+    "@togglecorp/toggle-form": "^2.0.0",
     "@togglecorp/toggle-ui": "^0.15.0",
     "react": "^18.2.0",
-    "react-dom": "^18.2.0"
+    "react-dom": "^18.2.0",
+    "unimported": "^1.22.0"
   }
 }
