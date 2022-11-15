@@ -5,10 +5,12 @@ A simple form library using react hooks
 
 ## Features
 
+- Reasonably typesafe
 - Powerful validation
 - Supports nested forms
 - Supports conditional fields
-- Reasonably typesafe
+- Supports automatic dependency tracking
+- Supports restore point
 
 ## Introduction
 
@@ -21,12 +23,13 @@ The library exposes three react hooks to define a form.
 ### useForm
 
 `useForm` hook is used to control a form.
-The `useForm` hook accepts these options:
+The `useForm` hook accepts these arguments:
 
-|option|description|
+|argument|description|
 |----|----|
-|value|The initial value for the form|
 |schema|The schema used to validate the form|
+|initialState|The initial state for the form|
+|context|The external context for form|
 
 The return value from `useForm` hooks are as follows:
 
@@ -34,20 +37,27 @@ The return value from `useForm` hooks are as follows:
 |----|----|
 |value|The value of the form|
 |error|The error state of the form|
-|pristine|The pristine state of the form|
-|pristine|Defines if the form is pristine|
+|pristine|True if the form is pristine|
+|setPristine|Defines if the form is pristine|
 |validate|If there are errors, sets form error else returns sanitized value|
 |setPristine|Function to set form's pristine state|
 |setError|Function to set form's error state|
 |setValue|Function to set form's value, error is cleared and pristine is set to true|
 |setFieldValue|Function to set form field's value and pristine is set to false|
+|hasRestorePoint|True if there is a restore point|
+|restorePointValue|Value of the form when restore point was created|
+|restorePointError|Error of the form when restore point was created|
+|restorePointPristine|Pristine stateof the form when restore point was created|
+|createRestorePoint|Function to create restore point|
+|restore|Function to restore state to last restore point|
+|clearRestorePoint|Function to clear last restore point|
 
 ### useFormObject
 
 `useFormObject` hook is used to control an object.
-The `useFormObject` hook accepts these options:
+The `useFormObject` hook accepts these arguments:
 
-|option|description|
+|argument|description|
 |----|----|
 |name|name of the object field|
 |onChange| change handler of the object|
@@ -59,9 +69,9 @@ fields.
 ### useFormArray
 
 `useFormArray` hook is used to control an array.
-The `useFormArray` hook accepts these options:
+The `useFormArray` hook accepts these arguments:
 
-|option|description|
+|argument|description|
 |----|----|
 |name|name of the array field|
 |onChange| change handler of the array|
@@ -86,7 +96,6 @@ The schema object is an object with these properties:
 |----|----|
 |validation|Function to validate the object|
 |fields|Function that defines the schema for each key of the object|
-|fieldDependencies|Function that defines the dependency between object keys|
 
 ### Array Schema
 
@@ -100,10 +109,15 @@ The array schema is an object with these properties:
 
 ### Literal Schema
 
-The literal schema is an array of validation functions.
-The validation function accepts the current value and the overall form value.
-The validation function can either return a string or undefined; the string
-return value is interpreted as an error.
+The literal schema is an object with these properties:
+
+|property|description|
+|----|----|
+|required|If defined, the literal will be required|
+|requiredCondition|If defined, this function will be used to check required condition|
+|defaultValue|If defined, the literal value will fallback to this value|
+|forceValue|If defined, the literal value will always be this value|
+|validations|Array of functions to validate the literal|
 
 ### Validation functions
 
@@ -124,47 +138,56 @@ The library provides these validation function:
 - emailCondition
 - urlCondition
 
-#### Special validation functions
+#### Symbols
 
-##### forceNullType
+##### nonFieldError
 
-Sometimes we would want to clear value for certain fields. We can use
-`forceNullType` to conditionally clear values.
+Symbol to access non field error on errors returned by `useForm`
 
-##### forceEmptyArrayType
+##### fieldDependencies
 
-Sometimes we would want to clear value for certain fields. We can use
-`forceEmptyArrayType` to conditionally clear array values.
+Symbol to define field dependencies on object schema
 
-##### defaultUndefinedType
+##### undefinedValue
 
-The form sets `null` to indicate there is no information. On special cases, we
-would want to set `undefined` instead of `null`.
+Symbol to define `undefined` on `forceValue` and `defaultValue` on literal schema
 
-##### defaultEmptyArrayType
+##### nullValue
 
-For array type, we would want to set `[]` to when there is no data.
-
+Symbol to define `null` on `forceValue` and `defaultValue` on literal schema
 
 ## Development
 
-### Running
+### Library
 
 ```bash
+cd lib
+
 # Install dependencies
 yarn install
 
-# Start storybook
-yarn storybook
-```
-
-### Linting
-
-```bash
 # Eslint
 yarn lint
 
 # Typescript
 yarn typecheck
+
+# Check unused files
+yarn check-unused
+
+# Test
+yarn test
+```
+
+### Storybook
+
+```bash
+cd storybook
+
+# Install dependencies
+yarn install
+
+# Start storybook
+yarn storybook
 ```
 
