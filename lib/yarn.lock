@@ -1860,10 +1860,12 @@
   dependencies:
     "@sinonjs/commons" "^1.7.0"
 
-"@togglecorp/fujs@^1.9.3":
-  version "1.9.3"
-  resolved "https://registry.yarnpkg.com/@togglecorp/fujs/-/fujs-1.9.3.tgz#d795d7dedc1ae7ee81437cdec78e272f6b871c2f"
-  integrity sha512-gPoQwZ5+CbDxXrLyHhGIAHq2HNba1ifZQizpspyWO8cOuhYyCihOAlBS3fH+WewlCvPiQiOD/FkxCnNQAG3lOg==
+"@togglecorp/fujs@^2.0.0":
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/@togglecorp/fujs/-/fujs-2.0.0.tgz#b1834326a173e568a226d956271b1b532b5f1f30"
+  integrity sha512-Fx5SF9kusbf35uT2WYlI6gdqqSL/e3JN4urAyB2O+jPz1VkG2I85VRqFxGjrg4m/ZZH+HRyGgLhSDn2V8LNdjA==
+  dependencies:
+    "@babel/runtime" "^7.19.0"
 
 "@tootallnate/once@1":
   version "1.1.2"
