@@ -10,7 +10,7 @@
     "typings": "build/esm/index.d.ts",
     "scripts": {
         "prepare": "install-peers",
-        "build": "rollup -c && tsc --project tsconfig-typings.json",
+        "build": "tsc --project tsconfig-typings.json && rollup -c",
         "watch": "rollup -c -w",
         "prepack": "yarn build",
         "typecheck": "tsc",
