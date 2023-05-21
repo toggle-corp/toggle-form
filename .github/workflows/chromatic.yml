@@ -12,6 +12,10 @@ jobs:
     runs-on: ubuntu-latest
     # the list of steps that the action will go through
     steps:
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 16
+
       - uses: actions/checkout@v1
 
       - name: Install Dependencies

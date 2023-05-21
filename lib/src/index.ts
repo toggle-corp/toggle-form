@@ -8,14 +8,13 @@ export {
     accumulateErrors,
     accumulateDifferentialErrors,
     analyzeErrors,
+    addCondition,
 } from './schema';
 export {
     isLocalUrl,
     isValidUrl,
     isCallable,
 } from './utils';
-export * from './validation';
-
 export type {
     Schema,
     LiteralSchema,
@@ -26,11 +25,16 @@ export type {
     ArrayError,
     ObjectError,
 } from './schema';
-// FIXME: rename to nonFieldErrorSymbol?
-export { nonFieldError } from './types';
+// FIXME: rename
+export {
+    nonFieldError,
+    fieldDependencies,
+    undefinedValue,
+    nullValue,
+} from './types';
 export type {
     PartialForm,
-    // FIXME: rename to NoNull?
+    // FIXME: rename
     PurgeNull,
     // FIXME: rename
     EntriesAsList,
@@ -40,16 +44,19 @@ export type {
     SetValueArg,
     // FIXME: rename
     SetBaseValueArg,
+    // FIXME: rename
+    SetErrorArg,
 } from './types';
 export {
     removeNull,
 } from './nullHelper';
 export {
-    // FIXME: rename to getErrorAsObject
+    // FIXME: rename
     getErrorObject,
-    // FIXME: rename to getErrorAsString
+    // FIXME: rename
     getErrorString,
 } from './errorAccessHelper';
 export {
     createSubmitHandler,
 } from './submissionHelper';
+export * from './validation';
