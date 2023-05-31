@@ -45,8 +45,8 @@ const schema: FormSchema = {
         const newSchema = addCondition(
             baseSchema,
             value,
-            ['detailed'] as const,
-            ['job', 'age', 'address'] as const,
+            ['detailed'],
+            ['job', 'age', 'address'],
             (props) => (props?.detailed ? {
                 job: {},
                 age: {

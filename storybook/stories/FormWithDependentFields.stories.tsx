@@ -38,8 +38,8 @@ const schema: FormSchema = {
         const newSchema = addCondition(
             baseSchema,
             value,
-            ['birthDate'] as const,
-            ['birthPlace'] as const,
+            ['birthDate'],
+            ['birthPlace'],
             (props) => (props?.birthDate ? {
                 birthPlace: {
                     required: true,

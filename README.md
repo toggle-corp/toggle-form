@@ -2,7 +2,6 @@
 
 A simple form library using react hooks
 
-
 ## Features
 
 - Reasonably typesafe
@@ -12,13 +11,13 @@ A simple form library using react hooks
 - Supports automatic dependency tracking
 - Supports restore point
 
-## Introduction
+## API
 
 The library exposes three react hooks to define a form.
 
 1. useForm
-2. useArrayField
-3. useObjectField
+2. useFormArray
+3. useFormObject
 
 ### useForm
 
@@ -104,7 +103,7 @@ The array schema is an object with these properties:
 |property|description|
 |----|----|
 |validation|Function to validate the array|
-|members|Function that defines the schema for each item of the array|
+|member|Function that defines the schema for each item of the array|
 |keySelector|Function that defines the unique key for each item of the array|
 
 ### Literal Schema
@@ -114,7 +113,7 @@ The literal schema is an object with these properties:
 |property|description|
 |----|----|
 |required|If defined, the literal will be required|
-|requiredCondition|If defined, this function will be used to check required condition|
+|requiredValidation|If defined, this function will be used to check required condition|
 |defaultValue|If defined, the literal value will fallback to this value|
 |forceValue|If defined, the literal value will always be this value|
 |validations|Array of functions to validate the literal|
@@ -138,21 +137,79 @@ The library provides these validation function:
 - emailCondition
 - urlCondition
 
-#### Symbols
+## Helper Functions
 
-##### nonFieldError
+### getErrorObject
+
+Function to convert leaf error to object error
+
+### getErrorString
+
+Function to convert object error or array error to string error
+
+### removeNull
+
+Function to recursively remove `null` values from an object
+
+### createSubmitHandler
+
+Predefined function to define submit handler for html form
+
+|argument|description|
+|----|----|
+|validator|Function to trigger form validation|
+|setError|Function to set form error|
+|successCallback|Callback for validation success|
+|failureCallback|Callback for validation failure|
+
+The return value is the function that can be passed to form `onSubmit` prop
+
+### addCondition
+
+Predefined function to add conditions on schema fields
+
+|argument|description|
+|----|----|
+|schema|Fields of the object schema|
+|value|Value of the object|
+|dependentKeys|Keys of the object that are used to define the condition|
+|valueKeys|Keys of the object that are affected by the condition|
+
+The return value is the updated fields of the object schema
+
+## Core Functions
+
+### accumulateValues
+
+Function to get validated value from form value and form schema
+
+### accumulateErrors
+
+Function to get form error from form value and form schema
+
+### accumulateDifferentialErrors
+
+Function to get differential form error from form value and form schema
+
+### analyzeErrors
+
+Function to identify if form has errored from the form error
+
+## Symbols
+
+### nonFieldError
 
 Symbol to access non field error on errors returned by `useForm`
 
-##### fieldDependencies
+### fieldDependencies
 
 Symbol to define field dependencies on object schema
 
-##### undefinedValue
+### undefinedValue
 
 Symbol to define `undefined` on `forceValue` and `defaultValue` on literal schema
 
-##### nullValue
+### nullValue
 
 Symbol to define `null` on `forceValue` and `defaultValue` on literal schema
 

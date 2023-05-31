@@ -3,7 +3,7 @@ export const nonFieldError = Symbol('Non Field Error');
 export const fieldDependencies = Symbol('Field Dependencies');
 
 export const undefinedValue = Symbol('Undefined Value');
-export const nullValue = Symbol('Undefined Value');
+export const nullValue = Symbol('Null Value');
 
 // declare const undefindValue: unique symbol;
 // declare const nullValue: unique symbol;
