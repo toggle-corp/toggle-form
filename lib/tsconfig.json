@@ -28,8 +28,7 @@
         "jsx": "react",
         "rootDir": "./src",
         "sourceMap": true,
-        "baseUrl": ".",
+        "baseUrl": "."
     },
-    "exclude": ["node_modules", "build", "coverage"],
-    "include": ["./src", "./declarations"]
+    "include": ["./src/index.ts", "./src/declarations"]
 }

@@ -44,6 +44,10 @@ export type ArraySchema<Value, TopValue = Value, Context = undefined> = {
         context: Context,
     ) => Schema<Value, TopValue, Context>;
     keySelector: (value: Value) => string | number;
+
+    // for accumulateValues
+    forceValue?: NonNullable<Value[]> | typeof undefinedValue | typeof nullValue,
+    defaultValue?: NonNullable<Value[]> | typeof undefinedValue | typeof nullValue,
 }
 
 export type ObjectSchema<Value, TopValue = Value, Context = undefined> = {
@@ -63,6 +67,10 @@ export type ObjectSchema<Value, TopValue = Value, Context = undefined> = {
             [fieldDependencies]?: { [K in keyof Value]: (keyof Value)[] };
         }
     );
+
+    // for accumulateValues
+    forceValue?: NonNullable<Value> | typeof undefinedValue | typeof nullValue,
+    defaultValue?: NonNullable<Value> | typeof undefinedValue | typeof nullValue,
 }
 
 export type Error<Value> = (

@@ -1,15 +1,13 @@
 {
-    'presets': [
-        '@babel/preset-env',
-        '@babel/preset-typescript',
-        '@babel/preset-react',
+    "presets": [
+        "@babel/preset-env",
+        "@babel/preset-typescript",
+        "@babel/preset-react"
     ],
-
-    'plugins': [
-        '@babel/plugin-transform-runtime',
-
-        ['polyfill-corejs3', {
-            "method": "usage-pure",
-        }],
-    ],
+    "plugins": [
+        "@babel/plugin-transform-runtime",
+        ["polyfill-corejs3", {
+            "method": "usage-pure"
+        }]
+    ]
 }

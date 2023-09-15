@@ -454,6 +454,14 @@ export function useFormObject<K, T>(
 ) {
     const setFieldValue = useCallback(
         (...entries: EntriesAsList<NonNullable<T>>) => {
+            // NOTE: there was a weird issue when using isCallable after
+            // typescript upgrade. So using a specific isNotCallable here
+            function isNotCallable(
+                value: SetValueArg<NonNullable<T>[keyof NonNullable<T>]>,
+            ): value is NonNullable<T>[keyof NonNullable<T>] {
+                return typeof value !== 'function';
+            }
+
             // NOTE: may need to cast callableValue here
             const [callableValue, key] = entries;
             onChange(
@@ -463,11 +471,12 @@ export function useFormObject<K, T>(
                             ? defaultValue()
                             : defaultValue
                     );
+                    const val = baseValue[key];
                     return {
                         ...baseValue,
-                        [key]: isCallable(callableValue)
-                            ? callableValue(baseValue[key])
-                            : callableValue,
+                        [key]: isNotCallable(callableValue)
+                            ? callableValue
+                            : callableValue(val),
                     };
                 },
                 name,
