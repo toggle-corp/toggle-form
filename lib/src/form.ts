@@ -30,11 +30,11 @@ interface RestoreRestorePointAction {
 interface ClearRestorePointAction {
     type: 'CLEAR_RESTORE_POINT';
 }
-interface ErrorAction<T extends object> {
+interface ErrorAction<T> {
     type: 'SET_ERROR';
     error: SetErrorArg<Error<T>> | undefined;
 }
-interface ValueAction<T extends object> {
+interface ValueAction<T> {
     type: 'SET_VALUE';
     value: SetBaseValueArg<T>;
     partialUpdate: boolean | undefined;
@@ -43,9 +43,9 @@ interface PristineAction {
     type: 'SET_PRISTINE';
     value: boolean;
 }
-type ValueFieldAction<T extends object> = EntriesAsKeyValue<T> & { type: 'SET_VALUE_FIELD' };
+type ValueFieldAction<T> = EntriesAsKeyValue<T> & { type: 'SET_VALUE_FIELD' };
 
-type Actions<T extends object> = ValueFieldAction<T>
+type Actions<T> = ValueFieldAction<T>
     | ErrorAction<T>
     | ValueAction<T>
     | PristineAction
@@ -71,7 +71,7 @@ type State<T> = {
     hasRestorePoint: false,
 });
 
-function useForm<T extends object>(
+function useForm<T>(
     schema: Schema<T, T, undefined>,
     initialState: {
         value: T,
@@ -99,7 +99,7 @@ function useForm<T extends object>(
     restore: () => void;
     clearRestorePoint: () => void;
 };
-function useForm<T extends object, C>(
+function useForm<T, C>(
     schema: Schema<T, T, C>,
     initialState: {
         value: T,
@@ -127,7 +127,7 @@ function useForm<T extends object, C>(
     restore: () => void;
     clearRestorePoint: () => void;
 };
-function useForm<T extends object, C>(
+function useForm<T, C>(
     schema: Schema<T, T, C>,
     initialState: {
         value: T,
@@ -447,7 +447,7 @@ function useForm<T extends object, C>(
     };
 }
 
-export function useFormObject<K extends string | number | undefined, T extends object | undefined>(
+export function useFormObject<K, T>(
     name: K,
     onChange: (value: SetValueArg<T>, name: K) => void,
     defaultValue: NonNullable<T> | (() => NonNullable<T>),
@@ -479,7 +479,7 @@ export function useFormObject<K extends string | number | undefined, T extends o
     return setFieldValue;
 }
 
-export function useFormArray<K extends string | number | undefined, T extends object>(
+export function useFormArray<K, T>(
     name: K,
     onChange: (
         newValue: SetValueArg<T[]>,

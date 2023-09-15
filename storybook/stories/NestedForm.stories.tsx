@@ -217,7 +217,7 @@ export function Default() {
                 (oldValue: PartialForm<Collections>) => (
                     [...(oldValue ?? []), newCollection]
                 ),
-                'collections' as const,
+                'collections',
             );
         },
         [setFieldValue],

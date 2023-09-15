@@ -118,14 +118,16 @@ export function addCondition<
     Value,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     SchemaType extends { [K in keyof Value ]: Schema<Value[K], any, any> },
-    DepKey extends NonNullable<Value>,
-    ValKey extends NonNullable<Value>,
+    const DepKey extends keyof NonNullable<Value>,
+    const ValKey extends keyof NonNullable<Value>,
 >(
     schema: SchemaType,
     value: Value,
     keys: readonly DepKey[],
     values: readonly ValKey[],
     updater: (
-        val: Value extends null | undefined ? null | undefined : Pick<Value, DepKey>,
+        val: Value extends null | undefined
+            ? null | undefined
+            : Pick<Value, DepKey>,
     ) => Pick<SchemaType, ValKey>,
 ): SchemaType;

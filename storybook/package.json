@@ -6,7 +6,7 @@
   "scripts": {
     "typecheck": "tsc",
     "lint": "eslint ./stories --report-unused-disable-directives",
-    "storybook": "start-storybook -p 6006",
+    "storybook": "NODE_OPTIONS=--openssl-legacy-provider start-storybook -p 6006",
     "build-storybook": "build-storybook"
   },
   "keywords": [],
@@ -23,8 +23,8 @@
     "@storybook/testing-library": "^0.0.13",
     "@types/react": "^18.0.21",
     "@types/react-dom": "^18.0.6",
-    "@typescript-eslint/eslint-plugin": "^5.39.0",
-    "@typescript-eslint/parser": "^5.39.0",
+    "@typescript-eslint/eslint-plugin": "^5.59.8",
+    "@typescript-eslint/parser": "^5.59.8",
     "babel-loader": "^8.2.5",
     "eslint": "^8.24.0",
     "eslint-config-airbnb": "^19.0.4",
@@ -38,7 +38,7 @@
     "stylelint": "^14.13.0",
     "stylelint-config-concentric": "^2.0.2",
     "stylelint-config-recommended": "^9.0.0",
-    "typescript": "^4.8.4",
+    "typescript": "^5.0.4",
     "vite": "^3.1.6"
   },
   "dependencies": {

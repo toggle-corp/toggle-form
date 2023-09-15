@@ -100,8 +100,8 @@ const errorFormTypeSchema: FormSchema = {
         return addCondition(
             fields,
             value,
-            ['startDate'] as const,
-            ['endDate'] as const,
+            ['startDate'],
+            ['endDate'],
             (v) => (v?.startDate ? {
                 endDate: {
                     required: true,

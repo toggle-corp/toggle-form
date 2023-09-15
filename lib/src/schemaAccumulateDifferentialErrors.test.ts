@@ -82,8 +82,8 @@ const errorFormTypeSchema: FormSchema = {
         fields = addCondition(
             fields,
             value,
-            ['startDate'] as const,
-            ['endDate'] as const,
+            ['startDate'],
+            ['endDate'],
             (v) => (v?.startDate ? {
                 endDate: {
                     required: true,
@@ -98,8 +98,8 @@ const errorFormTypeSchema: FormSchema = {
         fields = addCondition(
             fields,
             value,
-            ['name'] as const,
-            ['clients'] as const,
+            ['name'],
+            ['clients'],
             (v) => {
                 const clientsSchema: FormSchemaFields['clients'] = {
                     validation: (clients) => {
@@ -128,8 +128,8 @@ const errorFormTypeSchema: FormSchema = {
                             return addCondition(
                                 clientFields,
                                 clientValue,
-                                [] as const,
-                                ['name', 'strength'] as const,
+                                [],
+                                ['name', 'strength'],
                                 () => (v?.name === 'Admin' ? {
                                     name: {},
                                     strength: {},
