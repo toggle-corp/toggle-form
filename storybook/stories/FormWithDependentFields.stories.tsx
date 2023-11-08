@@ -4,17 +4,19 @@ import {
     TextInput,
     DateInput,
 } from '@togglecorp/toggle-ui';
+import {
+    type PartialForm,
+    type ObjectSchema,
+    useForm,
+    createSubmitHandler,
+    nonFieldError,
+    addCondition,
+    getErrorObject,
+    requiredStringCondition,
+} from '@togglecorp/toggle-form';
 
-import useForm from '../../lib/src/form';
-import { createSubmitHandler } from '../../lib/src/submissionHelper';
-import type { ObjectSchema } from '../../lib/src/schema';
-import { nonFieldError } from '../../lib/src/types';
-import { addCondition } from '../../lib/src/schema';
-import type { PartialForm } from '../../lib/src/types';
 import FormContainer from './FormContainer';
 import NonFieldError from './NonFieldError';
-import { getErrorObject } from '../../lib/src/errorAccessHelper';
-import { requiredStringCondition } from '../../lib/src/validation';
 
 type FormType = {
     firstName: string;

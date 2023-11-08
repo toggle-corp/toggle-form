@@ -4,18 +4,19 @@ import {
     TextInput,
     Checkbox,
 } from '@togglecorp/toggle-ui';
+import {
+    type PartialForm,
+    type ObjectSchema,
+    useForm,
+    createSubmitHandler,
+    nonFieldError,
+    getErrorObject,
+    requiredStringCondition,
+    undefinedValue,
+} from '@togglecorp/toggle-form';
 
-import { createSubmitHandler } from '../../lib/src/submissionHelper';
-import useForm from '../../lib/src/form';
-import type { PartialForm } from '../../lib/src/types';
-import { nonFieldError, undefinedValue } from '../../lib/src/types';
-import type { ObjectSchema } from '../../lib/src/schema';
 import NonFieldError from './NonFieldError';
 import FormContainer from './FormContainer';
-import {
-    requiredStringCondition,
-} from '../../lib/src/validation';
-import { getErrorObject } from '../../lib/src/errorAccessHelper';
 
 type FormType = {
     name?: string;

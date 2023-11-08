@@ -215,13 +215,15 @@ Symbol to define `null` on `forceValue` and `defaultValue` on literal schema
 
 ## Development
 
-### Library
+```bash
+# Install dependencies
+yarn install
+```
+
+### Lib
 
 ```bash
 cd lib
-
-# Install dependencies
-yarn install
 
 # Eslint
 yarn lint
@@ -241,10 +243,6 @@ yarn test
 ```bash
 cd storybook
 
-# Install dependencies
-yarn install
-
 # Start storybook
 yarn storybook
 ```
-

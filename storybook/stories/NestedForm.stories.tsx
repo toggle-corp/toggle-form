@@ -6,19 +6,24 @@ import {
     DateInput,
 } from '@togglecorp/toggle-ui';
 import { randomString } from '@togglecorp/fujs';
-
-import { createSubmitHandler } from '../../lib/src/submissionHelper';
-import useForm, { useFormArray, useFormObject } from '../../lib/src/form';
-import type { PartialForm as RawPartialForm, SetValueArg } from '../../lib/src/types';
-import type { Error, ObjectSchema, ArraySchema } from '../../lib/src/schema';
-import NonFieldError from './NonFieldError';
-import FormContainer, { Row } from './FormContainer';
 import {
+    type PartialForm as RawPartialForm,
+    type ObjectSchema,
+    type SetValueArg,
+    type ArraySchema,
+    type Error,
+    useForm,
+    useFormArray,
+    useFormObject,
+    createSubmitHandler,
+    nonFieldError,
+    getErrorObject,
     requiredStringCondition,
     greaterThanCondition,
-} from '../../lib/src/validation';
-import { getErrorObject } from '../../lib/src/errorAccessHelper';
-import { nonFieldError } from '../../lib/src/types';
+} from '@togglecorp/toggle-form';
+
+import NonFieldError from './NonFieldError';
+import FormContainer, { Row } from './FormContainer';
 
 type PartialForm<T> = RawPartialForm<T, 'clientId'>;
 

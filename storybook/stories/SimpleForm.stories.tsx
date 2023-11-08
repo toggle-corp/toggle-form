@@ -5,19 +5,20 @@ import {
     PasswordInput,
     MultiSelectInput,
 } from '@togglecorp/toggle-ui';
-
-import { createSubmitHandler } from '../../lib/src/submissionHelper';
-import useForm from '../../lib/src/form';
-import type { PartialForm } from '../../lib/src/types';
-import { nonFieldError } from '../../lib/src/types';
-import type { ObjectSchema } from '../../lib/src/schema';
-import NonFieldError from './NonFieldError';
-import FormContainer from './FormContainer';
 import {
+    type PartialForm,
+    type ObjectSchema,
+    useForm,
+    createSubmitHandler,
+    nonFieldError,
+    getErrorObject,
+    getErrorString,
     requiredStringCondition,
     requiredListCondition,
-} from '../../lib/src/validation';
-import { getErrorObject, getErrorString } from '../../lib/src/errorAccessHelper';
+} from '@togglecorp/toggle-form';
+
+import NonFieldError from './NonFieldError';
+import FormContainer from './FormContainer';
 
 interface Option {
     key: string;

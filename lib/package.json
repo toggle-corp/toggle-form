@@ -14,10 +14,10 @@
         "watch": "rollup -c -w",
         "prepack": "yarn build",
         "typecheck": "tsc",
+        "lint": "eslint ./src --report-unused-disable-directives",
         "check-unused": "unimported",
         "test": "jest",
-        "test:coverage": "jest --coverage",
-        "lint": "eslint ./src --report-unused-disable-directives"
+        "test:coverage": "jest --coverage"
     },
     "repository": {
         "type": "git",

@@ -4,16 +4,18 @@ import {
     TextInput,
     NumberInput,
 } from '@togglecorp/toggle-ui';
+import {
+    type PartialForm,
+    type ObjectSchema,
+    useForm,
+    createSubmitHandler,
+    nonFieldError,
+    getErrorObject,
+    requiredStringCondition,
+} from '@togglecorp/toggle-form';
 
-import { createSubmitHandler } from '../../lib/src/submissionHelper';
-import useForm from '../../lib/src/form';
-import type { PartialForm } from '../../lib/src/types';
-import { nonFieldError } from '../../lib/src/types';
-import type { ObjectSchema } from '../../lib/src/schema';
 import FormContainer from './FormContainer';
 import NonFieldError from './NonFieldError';
-import { getErrorObject } from '../../lib/src/errorAccessHelper';
-import { requiredStringCondition } from '../../lib/src/validation';
 
 type FormType = {
     step: number;
