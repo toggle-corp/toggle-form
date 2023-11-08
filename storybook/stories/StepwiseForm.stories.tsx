@@ -4,14 +4,16 @@ import {
     TextInput,
     NumberInput,
 } from '@togglecorp/toggle-ui';
+import {
+    type PartialForm,
+    type ObjectSchema,
+    useForm,
+    createSubmitHandler,
+    nonFieldError,
+    getErrorObject,
+    requiredStringCondition,
+} from '@togglecorp/toggle-form';
 
-import { createSubmitHandler } from '@togglecorp/toggle-form/src/submissionHelper';
-import useForm from '@togglecorp/toggle-form/src/form';
-import type { PartialForm } from '@togglecorp/toggle-form/src/types';
-import { nonFieldError } from '@togglecorp/toggle-form/src/types';
-import type { ObjectSchema } from '@togglecorp/toggle-form/src/schema';
-import { getErrorObject } from '@togglecorp/toggle-form/src/errorAccessHelper';
-import { requiredStringCondition } from '@togglecorp/toggle-form/src/validation';
 import FormContainer from './FormContainer';
 import NonFieldError from './NonFieldError';
 

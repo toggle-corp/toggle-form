@@ -20,11 +20,10 @@ jobs:
 
       - name: Install Dependencies
         run: yarn install
-        working-directory: lib
 
-      - name: Install Storybook Dependencies
-        run: yarn install
-        working-directory: storybook
+      - name: 🤞 Build Library 🧪
+        run: yarn build
+        working-directory: lib
 
       - name: 🤞 Run Typecheck 🧪
         run: yarn typecheck
@@ -34,7 +33,7 @@ jobs:
         run: yarn lint
         working-directory: storybook
 
-      - name: Publish to Chromatic
+      - name: 🤞 Publish to Chromatic 🧪
         uses: chromaui/action@v1
         # options required to the GitHub chromatic action
         with:

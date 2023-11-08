@@ -107,6 +107,7 @@ test('test isCallable', () => {
     }
     expect(isCallable(getTrue)).toBe(true);
     function noOp() {
+        // eslint-disable-next-line no-console
         console.warn('No operation');
     }
     expect(isCallable(noOp)).toBe(true);

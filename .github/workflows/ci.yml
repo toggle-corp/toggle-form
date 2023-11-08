@@ -20,7 +20,6 @@ jobs:
 
       - name: Install Dependencies
         run: yarn install
-        working-directory: lib
 
       - name: 🤞 Run Typecheck 🧪
         run: yarn typecheck
@@ -28,6 +27,10 @@ jobs:
 
       - name: 🤞 Run Lint 🧪
         run: yarn lint
+        working-directory: lib
+
+      - name: 🤞 Run Test 🧪
+        run: yarn test
         working-directory: lib
 
       - name: 🤞 Build 🧪

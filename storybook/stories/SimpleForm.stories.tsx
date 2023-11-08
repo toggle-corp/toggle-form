@@ -5,17 +5,18 @@ import {
     PasswordInput,
     MultiSelectInput,
 } from '@togglecorp/toggle-ui';
-
-import { createSubmitHandler } from '@togglecorp/toggle-form/src/submissionHelper';
-import useForm from '@togglecorp/toggle-form/src/form';
-import type { PartialForm } from '@togglecorp/toggle-form/src/types';
-import { nonFieldError } from '@togglecorp/toggle-form/src/types';
-import type { ObjectSchema } from '@togglecorp/toggle-form/src/schema';
 import {
+    type PartialForm,
+    type ObjectSchema,
+    useForm,
+    createSubmitHandler,
+    nonFieldError,
+    getErrorObject,
+    getErrorString,
     requiredStringCondition,
     requiredListCondition,
-} from '@togglecorp/toggle-form/src/validation';
-import { getErrorObject, getErrorString } from '@togglecorp/toggle-form/src/errorAccessHelper';
+} from '@togglecorp/toggle-form';
+
 import NonFieldError from './NonFieldError';
 import FormContainer from './FormContainer';
 
