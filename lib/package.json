@@ -1,13 +1,21 @@
 {
     "name": "@togglecorp/toggle-form",
-    "version": "2.0.3",
+    "version": "2.0.4",
     "description": "React form library by Togglecorp",
     "files": [
         "/build"
     ],
     "type": "module",
-    "main": "build/cjs/index.js",
+    "main": "build/cjs/index.cjs",
     "module": "build/esm/index.js",
+    "exports": {
+        "./package.json": "./package.json",
+        ".": {
+            "types": "./build/esm/index.d.ts",
+            "import": "./build/esm/index.js",
+            "require": "./build/cjs/index.cjs"
+        }
+    },
     "typings": "build/esm/index.d.ts",
     "scripts": {
         "prepare": "install-peers",
@@ -32,7 +40,7 @@
     "homepage": "https://github.com/toggle-corp/toggle-form#readme",
     "dependencies": {
         "@babel/runtime-corejs3": "^7.22.3",
-        "@togglecorp/fujs": "^2.0.0"
+        "@togglecorp/fujs": "^2.1.1"
     },
     "peerDependencies": {
         "react": "^18.2.0",
