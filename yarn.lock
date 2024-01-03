@@ -1995,6 +1995,14 @@
     core-js-pure "^3.30.2"
     regenerator-runtime "^0.14.0"
 
+"@babel/runtime-corejs3@^7.22.6":
+  version "7.23.7"
+  resolved "https://registry.yarnpkg.com/@babel/runtime-corejs3/-/runtime-corejs3-7.23.7.tgz#2c3d323d21569f2950c9126780bfa400632360bd"
+  integrity sha512-ER55qzLREVA5YxeyQ3Qu48tgsF2ZrFjFjUS6V6wF0cikSw+goBJgB9PBRM1T6+Ah4iiM+sxmfS/Sy/jdzFfhiQ==
+  dependencies:
+    core-js-pure "^3.30.2"
+    regenerator-runtime "^0.14.0"
+
 "@babel/runtime@7.7.2":
   version "7.7.2"
   resolved "https://registry.yarnpkg.com/@babel/runtime/-/runtime-7.7.2.tgz#111a78002a5c25fc8e3361bedc9529c696b85a6a"
@@ -2002,7 +2010,7 @@
   dependencies:
     regenerator-runtime "^0.13.2"
 
-"@babel/runtime@^7.0.0", "@babel/runtime@^7.10.2", "@babel/runtime@^7.11.2", "@babel/runtime@^7.12.5", "@babel/runtime@^7.13.8", "@babel/runtime@^7.17.8", "@babel/runtime@^7.19.0", "@babel/runtime@^7.20.1", "@babel/runtime@^7.5.0", "@babel/runtime@^7.7.6", "@babel/runtime@^7.8.4":
+"@babel/runtime@^7.0.0", "@babel/runtime@^7.10.2", "@babel/runtime@^7.11.2", "@babel/runtime@^7.12.5", "@babel/runtime@^7.13.8", "@babel/runtime@^7.17.8", "@babel/runtime@^7.20.1", "@babel/runtime@^7.5.0", "@babel/runtime@^7.7.6", "@babel/runtime@^7.8.4":
   version "7.20.1"
   resolved "https://registry.yarnpkg.com/@babel/runtime/-/runtime-7.20.1.tgz#1148bb33ab252b165a06698fde7576092a78b4a9"
   integrity sha512-mrzLkl6U9YLF8qpqI7TB82PESyEGjm/0Ly91jG575eVxMMlb8fYfOXFZIJ8XfLrJZQbm7dlKry2bJmXBUEkdFg==
@@ -3995,12 +4003,12 @@
   resolved "https://registry.yarnpkg.com/@togglecorp/fujs/-/fujs-1.9.3.tgz#d795d7dedc1ae7ee81437cdec78e272f6b871c2f"
   integrity sha512-gPoQwZ5+CbDxXrLyHhGIAHq2HNba1ifZQizpspyWO8cOuhYyCihOAlBS3fH+WewlCvPiQiOD/FkxCnNQAG3lOg==
 
-"@togglecorp/fujs@^2.0.0":
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/@togglecorp/fujs/-/fujs-2.0.0.tgz#b1834326a173e568a226d956271b1b532b5f1f30"
-  integrity sha512-Fx5SF9kusbf35uT2WYlI6gdqqSL/e3JN4urAyB2O+jPz1VkG2I85VRqFxGjrg4m/ZZH+HRyGgLhSDn2V8LNdjA==
+"@togglecorp/fujs@^2.1.1":
+  version "2.1.1"
+  resolved "https://registry.yarnpkg.com/@togglecorp/fujs/-/fujs-2.1.1.tgz#af3a202e42d9bd9f74e3aa5e48e3f3a65f83f6bf"
+  integrity sha512-2ofMs9xZxlctFqNAHERMqW436nqjSZdiDNJjsTquSVOXu9kFJzbIakhVXcZ5+UWJgrCbn8k7wcj1N5eO0OWFQA==
   dependencies:
-    "@babel/runtime" "^7.19.0"
+    "@babel/runtime-corejs3" "^7.22.6"
 
 "@togglecorp/toggle-ui@^0.15.0":
   version "0.15.0"
