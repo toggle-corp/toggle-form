@@ -622,3 +622,44 @@ test('accumulate differential errors with nested conditional', () => {
         },
     });
 });
+
+test('accumulate differential errors with nested conditional and reference preserve', () => {
+    const oldValue: PartialForm<FormType> = {
+        name: 'Hari Bahadur',
+        email: 'hari.bahadur@gmail.com',
+        clients: [
+            {
+                clientId: '1',
+                strength: -10,
+            },
+            {
+                clientId: '2',
+                strength: -10,
+            },
+        ],
+    };
+    const newValue: PartialForm<FormType> = {
+        ...oldValue,
+        name: 'Madan Krishna',
+    };
+    const oldError = {
+        clients: {
+            1: {
+                strength: 'The field must be greater than or equal to 0',
+            },
+            2: {
+                strength: 'The field must be greater than or equal to 0',
+            },
+        },
+    };
+    const newError = accumulateDifferentialErrors(
+        oldValue,
+        newValue,
+        oldError,
+        errorFormTypeSchema,
+        undefined,
+        undefined,
+    );
+    expect(newError).toStrictEqual(oldError);
+    expect(newError).toBe(oldError);
+});
