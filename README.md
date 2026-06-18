@@ -216,8 +216,8 @@ Symbol to define `null` on `forceValue` and `defaultValue` on literal schema
 ## Development
 
 ```bash
-# Install dependencies
-yarn install
+# Install dependencies (uses pnpm; `corepack enable` will provide it)
+pnpm install
 ```
 
 ### Lib
@@ -226,16 +226,16 @@ yarn install
 cd lib
 
 # Eslint
-yarn lint
+pnpm lint
 
 # Typescript
-yarn typecheck
+pnpm typecheck
 
 # Check unused files
-yarn check-unused
+pnpm check-unused
 
 # Test
-yarn test
+pnpm test
 ```
 
 ### Storybook
@@ -244,5 +244,7 @@ yarn test
 cd storybook
 
 # Start storybook
-yarn storybook
+# NOTE: on Node 17+ prefix with NODE_OPTIONS=--openssl-legacy-provider
+# (Storybook 6.5's webpack manager uses a hash OpenSSL 3 rejects)
+pnpm storybook
 ```
