@@ -1,16 +1,25 @@
 import {
     useReducer,
     useCallback,
+    useMemo,
 } from 'react';
 import { isNotDefined } from '@togglecorp/fujs';
 import {
     accumulateDifferentialErrors,
     accumulateErrors,
-    analyzeErrors,
     accumulateValues,
+    accumulateVisibility,
+    accumulateConstraints,
+    analyzeErrors,
 } from './schema';
 
-import type { Schema, Error } from './schema';
+import type {
+    Schema,
+    ObjectSchema,
+    Error,
+    VisibilityMap,
+    ConstraintMap,
+} from './schema';
 import type {
     SetValueArg,
     SetErrorArg,
@@ -71,90 +80,59 @@ type State<T> = {
     hasRestorePoint: false,
 });
 
-function useForm<T>(
-    schema: Schema<T, T, undefined>,
+type UseFormReturn<T extends object> = {
+    value: T,
+    error: Error<T> | undefined,
+    pristine: boolean,
+    validate: ValidateFunc<T>,
+
+    /** Which fields are currently visible (not force-hidden by addCondition). */
+    visibility: VisibilityMap<T>,
+    /** Built-in constraints extracted from the schema (maxLength, min, max …). */
+    constraints: ConstraintMap<T>,
+
+    setPristine: (pristine: boolean) => void,
+    setError: (errors: SetErrorArg<Error<T>> | undefined) => void,
+    setValue: (value: SetBaseValueArg<T>, partialUpdate?: boolean) => void,
+    setFieldValue: (...entries: EntriesAsList<T>) => void,
+
+    hasRestorePoint: boolean,
+    restorePointValue: T,
+    restorePointError: Error<T> | undefined,
+    restorePointPristine: boolean,
+
+    createRestorePoint: () => void;
+    restore: () => void;
+    clearRestorePoint: () => void;
+};
+
+function useForm<T extends object>(
+    schema: ObjectSchema<T, T, undefined>,
     initialState: {
         value: T,
         error?: Error<T>,
         pristine?: boolean,
     },
     context?: never,
-): {
-    value: T,
-    error: Error<T> | undefined,
-    pristine: boolean,
-    validate: ValidateFunc<T>,
-
-    setPristine: (pristine: boolean) => void,
-    setError: (errors: SetErrorArg<Error<T>> | undefined) => void,
-    setValue: (value: SetBaseValueArg<T>, partialUpdate?: boolean) => void,
-    setFieldValue: (...entries: EntriesAsList<T>) => void,
-
-    hasRestorePoint: boolean,
-    restorePointValue: T,
-    restorePointError: Error<T> | undefined,
-    restorePointPristine: boolean,
-
-    createRestorePoint: () => void;
-    restore: () => void;
-    clearRestorePoint: () => void;
-};
-function useForm<T, C>(
-    schema: Schema<T, T, C>,
+): UseFormReturn<T>;
+function useForm<T extends object, C>(
+    schema: ObjectSchema<T, T, C>,
     initialState: {
         value: T,
         error?: Error<T>,
         pristine?: boolean,
     },
     context: C,
-): {
-    value: T,
-    error: Error<T> | undefined,
-    pristine: boolean,
-    validate: ValidateFunc<T>,
-
-    setPristine: (pristine: boolean) => void,
-    setError: (errors: SetErrorArg<Error<T>> | undefined) => void,
-    setValue: (value: SetBaseValueArg<T>, partialUpdate?: boolean) => void,
-    setFieldValue: (...entries: EntriesAsList<T>) => void,
-
-    hasRestorePoint: boolean,
-    restorePointValue: T,
-    restorePointError: Error<T> | undefined,
-    restorePointPristine: boolean,
-
-    createRestorePoint: () => void;
-    restore: () => void;
-    clearRestorePoint: () => void;
-};
-function useForm<T, C>(
-    schema: Schema<T, T, C>,
+): UseFormReturn<T>;
+function useForm<T extends object, C>(
+    schema: ObjectSchema<T, T, C>,
     initialState: {
         value: T,
         error?: Error<T>,
         pristine?: boolean,
     },
     context: C,
-): {
-    value: T,
-    error: Error<T> | undefined,
-    pristine: boolean,
-    validate: ValidateFunc<T>,
-
-    setPristine: (pristine: boolean) => void,
-    setError: (errors: SetErrorArg<Error<T>> | undefined) => void,
-    setValue: (value: SetBaseValueArg<T>, partialUpdate?: boolean) => void,
-    setFieldValue: (...entries: EntriesAsList<T>) => void,
-
-    hasRestorePoint: boolean,
-    restorePointValue: T,
-    restorePointError: Error<T> | undefined,
-    restorePointPristine: boolean,
-
-    createRestorePoint: () => void;
-    restore: () => void;
-    clearRestorePoint: () => void;
-} {
+): UseFormReturn<T> {
     const {
         value: initialFormValue,
         error: initialError,
@@ -242,7 +220,7 @@ function useForm<T, C>(
                         oldValue,
                         newValue,
                         oldError,
-                        schema,
+                        schema as Schema<T, T, C>,
                         newValue,
                         context,
                         false,
@@ -289,7 +267,7 @@ function useForm<T, C>(
                     oldValue,
                     newValue,
                     oldError,
-                    schema,
+                    schema as Schema<T, T, C>,
                     newValue,
                     context,
                     false,
@@ -317,6 +295,16 @@ function useForm<T, C>(
             pristine: initialPristine,
             hasRestorePoint: false,
         },
+    );
+
+    const visibility = useMemo(
+        () => accumulateVisibility(state.value, schema, state.value, context),
+        [schema, state.value, context],
+    );
+
+    const constraints = useMemo(
+        () => accumulateConstraints(state.value, schema, state.value, context),
+        [schema, state.value, context],
     );
 
     const createRestorePoint = useCallback(
@@ -399,13 +387,18 @@ function useForm<T, C>(
 
     const validate: ValidateFunc<T> = useCallback(
         (accumulateOnError?: boolean) => {
-            const stateErrors = accumulateErrors(state.value, schema, state.value, context);
+            const stateErrors = accumulateErrors(
+                state.value,
+                schema as Schema<T, T, C>,
+                state.value,
+                context,
+            );
             const stateErrored = analyzeErrors(stateErrors);
             if (stateErrored) {
                 const value = accumulateOnError
                     ? accumulateValues(
                         state.value,
-                        schema,
+                        schema as Schema<T, T, C>,
                         state.value,
                         context,
                         { nullable: true },
@@ -415,7 +408,7 @@ function useForm<T, C>(
             // NOTE: server needs `null` to identify that the value is not defined
             const validatedValues = accumulateValues(
                 state.value,
-                schema,
+                schema as Schema<T, T, C>,
                 state.value,
                 context,
                 { nullable: true },
@@ -429,6 +422,9 @@ function useForm<T, C>(
         value: state.value,
         error: state.error,
         pristine: state.pristine,
+
+        visibility,
+        constraints,
 
         setError,
         setValue,

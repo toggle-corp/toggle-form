@@ -7,6 +7,8 @@ export {
     accumulateValues,
     accumulateErrors,
     accumulateDifferentialErrors,
+    accumulateVisibility,
+    accumulateConstraints,
     analyzeErrors,
     addCondition,
 } from './schema';
@@ -18,12 +20,16 @@ export {
 export type {
     Schema,
     LiteralSchema,
+    LiteralSchemaMessages,
     ArraySchema,
     ObjectSchema,
     Error,
     LeafError,
     ArrayError,
     ObjectError,
+    VisibilityMap,
+    FieldConstraints,
+    ConstraintMap,
 } from './schema';
 // FIXME: rename
 export {

@@ -10,27 +10,45 @@ jobs:
   publish-chromatic:
     # the operating system it will run on
     runs-on: ubuntu-latest
+    env:
+      # Storybook 6.5's webpack manager build uses a legacy hash that OpenSSL 3
+      # (Node 17+) rejects; this restores the legacy provider for the build.
+      NODE_OPTIONS: --openssl-legacy-provider
     # the list of steps that the action will go through
     steps:
-      - uses: actions/setup-node@v3
+      - uses: actions/checkout@v4
         with:
-          node-version: 16
+          # Chromatic needs full git history to establish baselines
+          fetch-depth: 0
 
-      - uses: actions/checkout@v1
+      # installs pnpm using the version from the root package.json "packageManager" field
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
 
       - name: Install Dependencies
-        run: yarn install
+        run: pnpm install --frozen-lockfile
 
       - name: 🤞 Build Library 🧪
-        run: yarn build
+        run: pnpm build
         working-directory: lib
 
       - name: 🤞 Run Typecheck 🧪
-        run: yarn typecheck
+        run: pnpm typecheck
         working-directory: storybook
 
       - name: 🤞 Run Lint 🧪
-        run: yarn lint
+        run: pnpm lint
+        working-directory: storybook
+
+      # Build Storybook here with pnpm (the runner's toolchain) rather than letting the
+      # Chromatic action build it — the action runs the CLI in its own container with yarn,
+      # which fails on this repo's "packageManager": "pnpm@..." field.
+      - name: 🤞 Build Storybook 🧪
+        run: pnpm run build-storybook
         working-directory: storybook
 
       - name: 🤞 Publish to Chromatic 🧪
@@ -38,5 +56,7 @@ jobs:
         # options required to the GitHub chromatic action
         with:
           workingDir: storybook
+          # Upload the pre-built output instead of having Chromatic rebuild it.
+          storybookBuildDir: storybook-static
           projectToken: ${{ secrets.CHROMATIC_PROJECT_TOKEN }}
           token: ${{ secrets.GITHUB_TOKEN }}

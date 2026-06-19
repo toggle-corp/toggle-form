@@ -3,39 +3,36 @@ import {
     isList,
     isDefined,
 } from '@togglecorp/fujs';
+import { PurgeNull } from './types';
 
 // eslint-disable-next-line import/prefer-default-export
-export function removeNull(
-    data,
-    ignoreKeys = ['__typename'],
-) {
+export function removeNull<T>(
+    data: T,
+    ignoreKeys: string[] | null | undefined = ['__typename'],
+): PurgeNull<T> {
     if (data === null || data === undefined) {
-        return undefined;
+        return undefined as PurgeNull<T>;
     }
     if (isList(data)) {
-        return data
+        return (data as unknown[])
             .map((item) => removeNull(item, ignoreKeys))
-            .filter(isDefined);
+            .filter(isDefined) as PurgeNull<T>;
     }
     if (isObject(data)) {
-        return Object.keys(data).reduce(
+        return (Object.keys(data as object) as string[]).reduce<Record<string, unknown>>(
             (acc, key) => {
                 if (ignoreKeys && ignoreKeys.includes(key)) {
                     return acc;
                 }
-
-                const val = data[key];
+                const val = (data as Record<string, unknown>)[key];
                 const newEntry = removeNull(val, ignoreKeys);
                 if (isDefined(newEntry)) {
-                    return {
-                        ...acc,
-                        [key]: newEntry,
-                    };
+                    return { ...acc, [key]: newEntry };
                 }
                 return acc;
             },
             {},
-        );
+        ) as PurgeNull<T>;
     }
-    return data;
+    return data as PurgeNull<T>;
 }
